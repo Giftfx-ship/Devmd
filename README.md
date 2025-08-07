@@ -10,7 +10,7 @@
 
 > Ready for liftoff? This bot is your co-pilot, crafted by Zed to navigate the cosmos of your tasks! With over 700 features, you're cleared for launch.
 
-![KingZord263](https://files.catbox.moe/38tp1u.jpg)
+![KingZord263](https://files.catbox.moe/7leokf.jpeg)
 <h3 align="center">
 
 [![Typing SVG](https://readme-typing-svg.demolab.com?font=Ariial+&pause=1000&color=000000&background=FF18E0&center=true&vCenter=true&width=435&lines=Andromeda+xr;Your++cosmic+copilot+%F0%9F%9B%B0%EF%B8%8F%E2%98%84%EF%B8%8F)](https://git.io/typing-svg)
