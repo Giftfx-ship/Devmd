@@ -20,13 +20,6 @@
   <img src="https://i.imgur.com/dBaSKWF.gif" height="40" width="100%">
 </p>
 
-
-![Typing SVG](https://readme-typing-svg.demolab.com?font=Black+Ops+One&size=110&pause=1000&color=ff0000&center=true&width=1000&height=200&lines=BENZ-XMD-V1)
-
-<p align="center">
-  <img src="https://i.imgur.com/dBaSKWF.gif" height="40" width="100%">
-</p>
-
 ---
 
 ## 🚀 Deployment Steps
@@ -62,7 +55,7 @@ First star & Fork the repo using the button below!
 
 | Heroku | TalkDrove |
 |--------|-----------|
-| [![Heroku](https://img.shields.io/badge/Heroku-430098?style=for-the-badge&logo=heroku&logoColor=white&labelColor=000000&color=00ffff)](https://dashboard.heroku.com/new?template=https://github.com/ALPHA-KING-TECH/BENZ-XMD-V1/tree/main) | [![TalkDrove](https://img.shields.io/badge/TalkDrove-6971FF?style=for-the-badge&logo=github&logoColor=white&labelColor=000000)](https://talkdrove.com/share-bot/11) |
+| [![Heroku](https://img.shields.io/badge/Heroku-430098?style=for-the-badge&logo=heroku&logoColor=white&labelColor=000000&color=00ffff)](https://dashboard.heroku.com/new?template=https://github.com/swtichedxp/ANDROMEDA-XR/main) | [![TalkDrove](https://img.shields.io/badge/TalkDrove-6971FF?style=for-the-badge&logo=github&logoColor=white&labelColor=000000)](https://talkdrove.com/share-bot/11) |
 
 | Koyeb | Railway |
 |-------|---------|
