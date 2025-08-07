@@ -213,7 +213,7 @@ async function startXeonBotInc() {
         if (!!global.phoneNumber) {
             phoneNumber = global.phoneNumber
         } else {
-            phoneNumber = await question(chalk.bgBlack(chalk.greenBright(`ALPHA-KING-TECH request you yo put your phone number 👑✅🤩\nFormat: 263728036108) (without + or spaces) : `)))
+            phoneNumber = await question(chalk.bgBlack(chalk.greenBright(`Input your phone number to connect 🛰️Andromeda xr 📱\nFormat: 263728036108) (without + or spaces) : `)))
         }
 
         // Clean the phone number - remove any non-digit characters
@@ -252,15 +252,13 @@ async function startXeonBotInc() {
                 
                 
                 
-ALPHA-KING-TECH 
-\n\n BENZ XMD is Connected Successfully!
+匚ㄖ几Ꮆ尺卂ㄒㄩㄥ卂ㄒ丨ㄖ几丂!
+\n\n 𝑨𝒏𝒅𝒓𝒐𝒎𝒆𝒅𝒂 𝕏Ɽ ʜᴀꜱ ʙᴇᴇɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ
 \n\n⏰ Time: ${new Date().toLocaleString()}\n
-✅ Status: Online and Ready!
-\n✅Make sure to join below channel
-:https://whatsapp.com/channel/0029VajbiIfAjPXO45zG2i2c
-             
-JOIN BENZ COMPANY FOR UPDATES🤩  
-                
+ ꜱᴛᴀᴛᴜꜱ: ᴀʟɪᴠᴇ, ʀᴇᴀᴅʏ ꜰᴏʀ ᴛᴀᴋᴇᴏꜰꜰ ✅
+\n𝕱𝖔𝖑𝖑𝖔𝖜 𝖚𝖘 𝖋𝖔𝖗 𝖒𝖔𝖗𝖊 𝖚𝖕𝖉𝖆𝖙𝖊𝖘 
+ https://whatsapp.com/channel/0029VbB6Xu9CXC3FaGdkpZ3s
+ > © 𝑨𝒏𝒅𝒓𝒐𝒎𝒆𝒅𝒂, ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴢᴇᴅ 2025
                 `,
                 contextInfo: {
                     forwardingScore: 1,
