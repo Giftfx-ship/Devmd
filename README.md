@@ -1,73 +1,59 @@
-<p align="center">
-  <img src="https://i.imgur.com/dBaSKWF.gif" height="40" width="100%">
-</p>
-
-# DEVMD
-
-> Ready for liftoff? This bot is your co-pilot, crafted by Zed to navigate the cosmos of your tasks! With over 700 features, you're cleared for launch.
-
-![KingZord263](https://files.catbox.moe/7leokf.jpeg)
-
-<h3 align="center">
-
-[![Typing SVG](https://readme-typing-svg.demolab.com?font=Ariial+&pause=1000&color=000000&background=FF18E0&center=true&vCenter=true&width=435&lines=DEVMD;Your++cosmic+copilot+%F0%9F%9B%B0%EF%B8%8F%E2%98%84%EF%B8%8F)](https://git.io/typing-svg)
+# <span style="color:#1E90FF; font-size: 3.5em; font-weight: 900;">DEVMD</span>
 
 <p align="center">
-  <img src="https://i.imgur.com/dBaSKWF.gif" height="40" width="100%">
+  <img src="assets/bot_image.jpg" alt="DEVMD Bot" width="300" />
 </p>
+
+## <span style="color:#FF4500; font-size: 1.8em;">POWERED BY <span style="font-family: 'Courier New', Courier, monospace;">𝐌𝐑ܮ𝐃𝐄𝐕『ᴾᴿᴵ́ᴹᴱ́』</span></span>
 
 ---
 
-## 🚀 Deployment Steps
+### 🚀 Deployment Options
 
-### 1. Fork This Repository
+**DEVMD** supports deployment on:
 
-Star & Fork the repo using the button below!
+- 🕸️ **Web Control Panels** (cPanel, Plesk, etc.)  
+- 🖥️ **VPS / Dedicated Servers**
 
-[![FORK_REPOSITORY](https://img.shields.io/badge/FORK_REPOSITORY-FF5500?style=for-the-badge&logo=github&logoColor=white&labelColor=000000)](https://github.com/Giftfx-ship/Devmd/fork)
-
----
-
-## 🚀 DEPLOYMENT OPTIONS
-
-| Heroku | TalkDrove |
-|--------|-----------|
-| [![Heroku](https://img.shields.io/badge/Heroku-430098?style=for-the-badge&logo=heroku&logoColor=white&labelColor=000000&color=00ffff)](https://dashboard.heroku.com/new?template=https://github.com/Giftfx-ship/Devmd) | [![TalkDrove](https://img.shields.io/badge/TalkDrove-6971FF?style=for-the-badge&logo=github&logoColor=white&labelColor=000000)](https://talkdrove.com/share-bot/11) |
-
-| Koyeb | Railway |
-|-------|---------|
-| [![Koyeb](https://img.shields.io/badge/Koyeb-FF009D?style=for-the-badge&logo=koyeb&logoColor=white&labelColor=000000)](https://app.koyeb.com/services/deploy?type=git&repository=Giftfx-ship/Devmd) | [![Railway](https://img.shields.io/badge/Railway-FF8700?style=for-the-badge&logo=railway&logoColor=white&labelColor=000000)](https://railway.app/new) |
-
-| Render | Netlify |
-|--------|---------|
-| [![Render](https://img.shields.io/badge/Render-000000?style=for-the-badge&logo=render&logoColor=white&labelColor=000000&color=00ffaa)](https://dashboard.render.com/web/new) | [![Netlify](https://img.shields.io/badge/Netlify-CC00FF?style=for-the-badge&logo=huggingface&logoColor=white&labelColor=000000)](https://app.netlify.com/) |
-
-<p align="center">
-  <img src="https://i.imgur.com/dBaSKWF.gif" height="40" width="100%">
-</p>
+> ⚠️ For best performance and reliability, use a VPS or dedicated panel deployment.
 
 ---
 
-## DEVELOPER  
-MRDEV☄️  
-## CREDITS: ALPHA-KING-TECH  
-## FOLLOW FOR UPDATES  
+### 🖥️ Bot Hosting
 
-[🧑‍💻 Follow Our Whatsapp Channel🧑‍💻](https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F)
+Host your DEVMD bot easily with **bothosting.com** — reliable, professional hosting service.
 
-* [✅ Join Public Group ⚡](https://chat.whatsapp.com/LhkW0hPNyMEI3wIJqkJK8A?mode=ac_t)  
-* [Contact the dev🏆](https://wa.me/2349164624021)  
+🔗 Check it out here:  
+[https://bothosting.com](https://bothosting.com)
 
-<h3 align="center">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=20&duration=3000&color=FFFFFF&background=000000&center=true&vCenter=true&width=600&lines=DEVMD+by+zed⚡+automate+through+the+stars" alt="Footer Animation">
-</h3>
+---
 
-<p align="center">
-  <img src="https://i.imgur.com/dBaSKWF.gif" height="40" width="100%">
-</p>
+### ✨ Features
 
-AN ASSISTANT DESIGNED FORGED FROM ANDROMEDA  
+- ⚡ **Fast and Lightweight** bot optimized for performance  
+- 🔒 **Secure Authentication** for user protection  
+- 🔄 **Automatic Updates** to keep your bot up-to-date  
+- 🛠️ **Easy Configuration** with simple setup steps  
+- 📞 **24/7 Developer Support** via WhatsApp contact  
+- 📊 **Detailed Logs & Monitoring** for maintenance  
+- 🌐 **Multi-platform Compatible** (supports Linux, Windows VPS)  
 
-<p align="center">
-  <img src="https://i.imgur.com/dBaSKWF.gif" height="40" width="100%">
-</p>
+---
+
+### 💬 Join Our WhatsApp Group Chat
+
+Stay connected, chat, and collaborate with other users here:
+
+👉 [**Join DEVMD Group Chat**](https://chat.whatsapp.com/LhkW0hPNyMEI3wIJqkJK8A?mode=ac_t)
+
+---
+
+### 👨‍💻 Developer
+
+**𝐌𝐑ܮ𝐃𝐄𝐕『ᴾᴿᴵ́ᴹᴱ́』**
+
+📱 Contact via WhatsApp: [ +234 916 462 4031 ](https://wa.me/2349164624031)
+
+---
+
+*Thank you for choosing DEVMD — the professional bot solution!*
