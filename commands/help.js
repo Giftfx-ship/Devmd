@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 
 module.exports = {
@@ -46,8 +46,14 @@ module.exports = {
 
         try {
             const imagePath = path.join(__dirname, '../assets/bot_image.jpg');
-            if (fs.existsSync(imagePath)) {
-                const imageBuffer = fs.readFileSync(imagePath);
+            let imageExists = false;
+            try {
+                await fs.access(imagePath);
+                imageExists = true;
+            } catch {}
+
+            if (imageExists) {
+                const imageBuffer = await fs.readFile(imagePath);
                 await sock.sendMessage(chatId, {
                     image: imageBuffer,
                     caption: helpMessage,
@@ -73,11 +79,11 @@ module.exports = {
                             serverMessageId: -1
                         }
                     }
-                });
+                }, { quoted: message });
             }
         } catch (error) {
             console.error('Error in help command:', error);
-            await sock.sendMessage(chatId, { text: helpMessage });
+            await sock.sendMessage(chatId, { text: helpMessage }, { quoted: message });
         }
     }
 };
