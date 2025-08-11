@@ -125,8 +125,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
     const message = messages[0];
     if (!message?.message) return;
 
-    // Store message for antidelete feature
-    storeMessage(message);
+    // Removed storeMessage call here
 
     // Handle message revocation
     if (message.message?.protocolMessage?.type === 0) {
@@ -232,8 +231,6 @@ async function handleMessages(sock, messageUpdate, printLog) {
     // Unknown command or no action needed
   } catch (error) {
     console.error('Error in handleMessages:', error);
-    // Optionally notify user here
-    // await sock.sendMessage(chatId, { text: '❌ An error occurred while processing your command.' });
   }
 }
 
