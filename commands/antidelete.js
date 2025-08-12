@@ -1,10 +1,10 @@
 const fs = require('fs');
 const path = require('path');
-const settings = require('../settings'); // ⬅ Added so botName & channel can be used
+const settings = require('../settings'); // for botName & channel
 const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
 const { writeFile } = require('fs/promises');
+const { isAdmin } = require('../lib/isadmin'); // Import your isAdmin helper
 
-// Developer Tag (Dynamic from settings)
 const DEV_TAG = `*💠 ${settings.botName}*\n👨‍💻 Created by 𝐌𝐑ܮ𝐃𝐄𝐕『ᴾᴿᴵ́ᴹᴱ́』\n🔗 Channel: ${settings.channel}`;
 
 const messageStore = new Map();
@@ -66,8 +66,21 @@ function saveAntideleteConfig(config) {
 }
 
 async function handleAntideleteCommand(sock, chatId, message, match) {
+    // Only work in groups
+    if (!chatId.endsWith('@g.us')) {
+        return sock.sendMessage(chatId, { text: '*This command only works in groups.*' }, { quoted: message });
+    }
+
+    // Check if sender is admin
+    const senderId = message.key.participant || message.key.remoteJid;
+    const { isSenderAdmin } = await isAdmin(sock, chatId, senderId);
+    if (!isSenderAdmin) {
+        return sock.sendMessage(chatId, { text: '*Only group admins can use this command.*' }, { quoted: message });
+    }
+
+    // Only allow bot owner to toggle antidelete (optional)
     if (!message.key.fromMe) {
-        return sock.sendMessage(chatId, { text: '*Only the bot owner can use this command.*' }, { quoted: message });
+        return sock.sendMessage(chatId, { text: '*Only the bot owner can toggle antidelete.*' }, { quoted: message });
     }
 
     const config = loadAntideleteConfig();
