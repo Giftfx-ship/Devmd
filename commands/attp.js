@@ -7,14 +7,19 @@ async function attpCommand(sock, chatId, message) {
     const userMessage = message.message?.conversation || message.message?.extendedTextMessage?.text || '';
     const text = userMessage.split(' ').slice(1).join(' ');
 
-    if (!text) {
-        await sock.sendMessage(chatId, { text: '*Please provide text after the .attp command.*\n\n_Created by Developer Prime_' });
+    if (!text.trim()) {
+        await sock.sendMessage(chatId, {
+            text: '*Please provide text after the .attp command.*\n\n_Created by: Dev Prime_'
+        });
         return;
     }
 
     const width = 512;
     const height = 512;
-    const stickerPath = path.join(__dirname, './temp', `sticker-${Date.now()}.png`);
+    const tempDir = path.join(__dirname, 'temp');
+    if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
+
+    const stickerPath = path.join(tempDir, `sticker-${Date.now()}.png`);
 
     try {
         const font = await Jimp.loadFont(Jimp.FONT_SANS_64_BLACK);
@@ -23,28 +28,35 @@ async function attpCommand(sock, chatId, message) {
         const textWidth = Jimp.measureText(font, text);
         const textHeight = Jimp.measureTextHeight(font, text, width);
 
-        const x = (width - textWidth) / 2;
-        const y = (height - textHeight) / 2;
+        const x = Math.max(0, (width - textWidth) / 2);
+        const y = Math.max(0, (height - textHeight) / 2);
 
-        image.print(font, x, y, text, width);
+        image.print(font, x, y, {
+            text,
+            alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
+            alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE
+        }, width, height);
+
         await image.writeAsync(stickerPath);
 
         const stickerBuffer = await sharp(stickerPath)
             .resize(512, 512, { fit: 'cover' })
-            .webp()
+            .webp({ quality: 100 })
             .toBuffer();
 
         await sock.sendMessage(chatId, {
             sticker: stickerBuffer,
             mimetype: 'image/webp',
-            packname: 'Andromeda Xʀ Stickers', 
-            author: 'Developer Prime', // not editable
+            packname: 'Andromeda Xʀ Stickers',
+            author: 'Dev Prime'
         });
 
         fs.unlinkSync(stickerPath);
     } catch (error) {
         console.error('Error generating sticker:', error);
-        await sock.sendMessage(chatId, { text: '*Failed to generate the sticker. Please try again later.*\n\n_Created by Developer Prime_' });
+        await sock.sendMessage(chatId, {
+            text: '*Failed to generate the sticker. Please try again later.*\n\n_Created by: Dev Prime_'
+        });
     }
 }
 
