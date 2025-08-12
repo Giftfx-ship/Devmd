@@ -1,75 +1,69 @@
+const isAdmin = require('../lib/isadmin');
+
 const channelInfo = {
-    footer: "Created by MR DEV | Join our channel: https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F"
+  footer: "Created by MR DEV | Join our channel: https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F"
 };
 
-async function kickCommand(sock, chatId, senderId, mentionedJids, message) {
-    // Check if user is owner
+async function kickCommand(sock, chatId, senderId, message) {
+  try {
     const isOwner = message.key.fromMe;
+
+    // Extract mentioned JIDs if any
+    const mentionedJids = message.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
+
+    // Check if sender is admin if not owner
     if (!isOwner) {
-        // Assuming you handle isAdmin function elsewhere or remove dependency
-        const { isSenderAdmin, isBotAdmin } = await isAdmin(sock, chatId, senderId);
+      const { isSenderAdmin, isBotAdmin } = await isAdmin(sock, chatId, senderId);
 
-        if (!isBotAdmin) {
-            await sock.sendMessage(chatId, { text: 'Please make the bot an admin first.', ...channelInfo }, { quoted: message });
-            return;
-        }
+      if (!isBotAdmin) {
+        await sock.sendMessage(chatId, 
+          { text: 'Please make the bot an admin first.', ...channelInfo }, 
+          { quoted: message }
+        );
+        return;
+      }
 
-        if (!isSenderAdmin) {
-            await sock.sendMessage(chatId, { text: 'Only group admins can use the kick command.', ...channelInfo }, { quoted: message });
-            return;
-        }
+      if (!isSenderAdmin) {
+        await sock.sendMessage(chatId, 
+          { text: 'Only group admins can use the kick command.', ...channelInfo }, 
+          { quoted: message }
+        );
+        return;
+      }
     }
 
     let usersToKick = [];
-    
-    // Check for mentioned users
-    if (mentionedJids && mentionedJids.length > 0) {
-        usersToKick = mentionedJids;
+
+    if (mentionedJids.length > 0) {
+      usersToKick = mentionedJids;
+    } else if (message.message?.extendedTextMessage?.contextInfo?.participant) {
+      usersToKick = [message.message.extendedTextMessage.contextInfo.participant];
     }
-    // Check for replied message
-    else if (message.message?.extendedTextMessage?.contextInfo?.participant) {
-        usersToKick = [message.message.extendedTextMessage.contextInfo.participant];
-    }
-    
-    // If no user found through either method
+
     if (usersToKick.length === 0) {
-        await sock.sendMessage(chatId, { 
-            text: 'Please mention the user or reply to their message to kick!',
-            ...channelInfo
-        }, { quoted: message });
-        return;
+      await sock.sendMessage(chatId, 
+        { text: 'Please mention or reply to a user to kick.', ...channelInfo }, 
+        { quoted: message }
+      );
+      return;
     }
 
-    // Get bot's ID
-    const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-
-    // Check if any of the users to kick is the bot itself
-    if (usersToKick.includes(botId)) {
-        await sock.sendMessage(chatId, { 
-            text: "I can't kick myself! 🤖",
-            ...channelInfo
-        }, { quoted: message });
-        return;
+    // Kick users one by one
+    for (const userId of usersToKick) {
+      await sock.groupParticipantsUpdate(chatId, [userId], 'remove');
     }
 
-    try {
-        await sock.groupParticipantsUpdate(chatId, usersToKick, "remove");
-        
-        // Get usernames for each kicked user
-        const usernames = usersToKick.map(jid => `@${jid.split('@')[0]}`);
-        
-        await sock.sendMessage(chatId, { 
-            text: `${usernames.join(', ')} has been kicked successfully!`,
-            mentions: usersToKick,
-            ...channelInfo
-        });
-    } catch (error) {
-        console.error('Error in kick command:', error);
-        await sock.sendMessage(chatId, { 
-            text: 'Failed to kick user(s)!',
-            ...channelInfo
-        });
-    }
+    await sock.sendMessage(chatId, 
+      { text: `✅ Kicked ${usersToKick.length} user(s) from the group.`, ...channelInfo }
+    );
+
+  } catch (error) {
+    console.error('Error in kick command:', error);
+    await sock.sendMessage(chatId, 
+      { text: '❌ Failed to kick user(s).', ...channelInfo }, 
+      { quoted: message }
+    );
+  }
 }
 
 module.exports = kickCommand;
