@@ -1,4 +1,4 @@
-const { isAdmin } = require('../lib/isAdmin');
+const { isAdmin } = require('../lib/isadmin');
 
 const channelInfo = {
     footer: "made by Mr Dev Prime"
