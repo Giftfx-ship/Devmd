@@ -4,34 +4,6 @@ const makeWASocket = require("@whiskeysockets/baileys").default;
 const { useMultiFileAuthState } = require("@whiskeysockets/baileys");
 const P = require("pino");
 
-// ===== Ban System =====
-const bannedFile = path.join(__dirname, "banned.json");
-let bannedUsers = [];
-
-if (fs.existsSync(bannedFile)) {
-  bannedUsers = JSON.parse(fs.readFileSync(bannedFile, "utf8"));
-}
-
-function saveBans() {
-  fs.writeFileSync(bannedFile, JSON.stringify(bannedUsers, null, 2));
-}
-
-function isBanned(id) {
-  return bannedUsers.includes(id);
-}
-
-function banUser(id) {
-  if (!bannedUsers.includes(id)) {
-    bannedUsers.push(id);
-    saveBans();
-  }
-}
-
-function unbanUser(id) {
-  bannedUsers = bannedUsers.filter((user) => user !== id);
-  saveBans();
-}
-
 // ===== Load Commands =====
 const commands = new Map();
 const commandsPath = path.join(__dirname, "commands");
@@ -83,27 +55,6 @@ async function handleMessage(sock, msg) {
     msg.message?.extendedTextMessage?.text ||
     msg.message?.imageMessage?.caption ||
     "";
-
-  // Ban check
-  if (isBanned(senderId) && !messageText.startsWith(".unban")) {
-    console.log(`🚫 Banned user tried to use command: ${senderId}`);
-    return;
-  }
-
-  // Ban/unban commands
-  if (messageText.startsWith(".ban ")) {
-    const target = messageText.split(" ")[1];
-    banUser(target);
-    await sock.sendMessage(senderId, { text: `✅ ${target} has been banned.` });
-    return;
-  }
-
-  if (messageText.startsWith(".unban ")) {
-    const target = messageText.split(" ")[1];
-    unbanUser(target);
-    await sock.sendMessage(senderId, { text: `✅ ${target} has been unbanned.` });
-    return;
-  }
 
   // Normal commands
   if (messageText.startsWith(".")) {
@@ -162,7 +113,7 @@ async function startBot() {
 
   const sock = makeWASocket({
     logger: P({ level: "silent" }),
-    printQRInTerminal: false, // keep as you had it
+    printQRInTerminal: false,
     auth: state,
   });
 
@@ -177,7 +128,6 @@ async function startBot() {
         console.log("❌ Logged out or session invalid. Please delete session folder and re-run.");
       } else {
         console.log("🔄 Reconnected.");
-        // Optional: you can reconnect here if you want
       }
     }
   });
@@ -203,4 +153,4 @@ module.exports = {
 
 if (require.main === module) {
   startBot();
-                               }
+                  }
