@@ -4,11 +4,11 @@ const path = require('path');
 const Jimp = require('jimp');
 
 async function attpCommand(sock, chatId, message) {
-    const userMessage = message.message.conversation || message.message.extendedTextMessage?.text || '';
+    const userMessage = message.message?.conversation || message.message?.extendedTextMessage?.text || '';
     const text = userMessage.split(' ').slice(1).join(' ');
 
     if (!text) {
-        await sock.sendMessage(chatId, { text: 'Please provide text after the .attp command.' });
+        await sock.sendMessage(chatId, { text: '*Please provide text after the .attp command.*\n\n_Created by Developer Prime_' });
         return;
     }
 
@@ -37,14 +37,14 @@ async function attpCommand(sock, chatId, message) {
         await sock.sendMessage(chatId, {
             sticker: stickerBuffer,
             mimetype: 'image/webp',
-            packname: 'My Sticker Pack', 
-            author: 'My Bot', 
+            packname: 'Andromeda Xʀ Stickers', 
+            author: 'Developer Prime', // not editable
         });
 
         fs.unlinkSync(stickerPath);
     } catch (error) {
         console.error('Error generating sticker:', error);
-        await sock.sendMessage(chatId, { text: 'Failed to generate the sticker. Please try again later.' });
+        await sock.sendMessage(chatId, { text: '*Failed to generate the sticker. Please try again later.*\n\n_Created by Developer Prime_' });
     }
 }
 
