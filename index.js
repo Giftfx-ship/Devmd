@@ -1,3 +1,6 @@
+// Load global settings
+require('./setting');
+
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
@@ -10,15 +13,22 @@ const {
   fetchLatestBaileysVersion,
 } = require('@whiskeysockets/baileys');
 
-const { handleMessages, handleGroupParticipantUpdate, handleStatus } = require('./main');
+const {
+  handleMessages,
+  handleGroupParticipantUpdate,
+  handleStatus,
+  startBot: startMainBot,
+} = require('./main');
 
-const sessionFolder = path.resolve('./session');
+const config = require('./config');
+
+const sessionFolder = path.resolve(config.sessionFolder);
 const git = simpleGit();
 
 function showBanner() {
   console.clear();
   console.log(chalk.cyan.bold("══════════════════════════════════════════"));
-  console.log(chalk.magenta.bold("            💠 𝐃𝐄𝐕𝐌𝐃 𝐖𝐡𝐚𝐭𝐬𝐀𝐩𝐩 𝐁𝐨𝐭 💠"));
+  console.log(chalk.magenta.bold(`            💠 ${global.botName} WhatsApp Bot 💠`));
   console.log(chalk.cyan.bold("══════════════════════════════════════════\n"));
 }
 
@@ -50,7 +60,7 @@ async function startBot() {
   sock.ev.on('connection.update', (update) => {
     const { ref, connection } = update;
 
-    if (ref) {
+    if (ref && global.pairingCode) {
       console.log(chalk.green(`\n🔢 Your 6-digit pairing code is: ${ref}\n`));
       console.log(chalk.yellow('📌 Open WhatsApp > Linked Devices > Link a Device > Enter this code.'));
     }
@@ -58,13 +68,14 @@ async function startBot() {
     if (connection === 'open') {
       console.clear();
       console.log(chalk.cyan.bold("══════════════════════════════════════════"));
-      console.log(chalk.green.bold('✅ DEVMD Bot Connected Successfully!'));
+      console.log(chalk.green.bold(`✅ ${global.botName} Connected Successfully!`));
       console.log(chalk.yellow(`🤖 Logged in as: ${sock.user.id}`));
       console.log(chalk.yellow(`📅 Date: ${new Date().toLocaleString()}`));
       console.log(chalk.cyan.bold("══════════════════════════════════════════\n"));
     }
 
     if (connection === 'close') {
+      console.log(chalk.yellow('🔄 Disconnected. Attempting to reconnect...'));
       startBot();
     }
   });
@@ -93,7 +104,7 @@ async function startBot() {
     }
   });
 
-  // Auto-update checker (silent unless update found)
+  // Silent auto-update checker
   async function checkForUpdates() {
     try {
       await git.fetch();
@@ -102,15 +113,14 @@ async function startBot() {
         console.log(chalk.blue('🔄 Update detected! Pulling latest changes from GitHub...'));
         await git.pull();
         console.log(chalk.green('✅ Bot updated. Restarting...'));
-        process.exit(0); // Exit so pm2 restarts with new code
+        process.exit(0);
       }
-    } catch (err) {
-      // Fail silently or uncomment to debug:
-      // console.error('Update check failed:', err.message);
+    } catch {
+      // silently ignore update errors
     }
   }
 
-  setInterval(checkForUpdates, 10 * 60 * 1000); // every 10 minutes
+  setInterval(checkForUpdates, config.updateCheckIntervalMs);
   checkForUpdates();
 }
 
