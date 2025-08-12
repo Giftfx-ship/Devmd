@@ -4,7 +4,7 @@ const makeWASocket = require("@whiskeysockets/baileys").default;
 const { useMultiFileAuthState } = require("@whiskeysockets/baileys");
 const P = require("pino");
 
-// Ban system
+// ===== Ban System =====
 const bannedFile = path.join(__dirname, "banned.json");
 let bannedUsers = [];
 
@@ -32,7 +32,7 @@ function unbanUser(id) {
   saveBans();
 }
 
-// Load commands
+// ===== Load Commands =====
 const commands = new Map();
 const commandsPath = path.join(__dirname, "commands");
 
@@ -42,7 +42,6 @@ if (fs.existsSync(commandsPath)) {
       const filePath = path.join(commandsPath, file);
       try {
         const cmdModule = require(filePath);
-
         let name = cmdModule.name || file.replace(".js", "").toLowerCase();
         let executeFn = null;
 
@@ -76,12 +75,13 @@ if (fs.existsSync(commandsPath)) {
   console.warn("⚠️ Commands folder not found!");
 }
 
-// Message handler
+// ===== Message Handler =====
 async function handleMessage(sock, msg) {
   const senderId = msg.key.remoteJid;
   const messageText =
-    msg.message.conversation ||
-    msg.message.extendedTextMessage?.text ||
+    msg.message?.conversation ||
+    msg.message?.extendedTextMessage?.text ||
+    msg.message?.imageMessage?.caption ||
     "";
 
   // Ban check
@@ -121,7 +121,46 @@ async function handleMessage(sock, msg) {
   }
 }
 
-// Main bot start
+// ===== Compatibility Wrappers =====
+async function handleMessages(sock, m) {
+  if (!m) return;
+
+  // If this is a Baileys upsert object
+  if (m.messages && Array.isArray(m.messages)) {
+    for (const msg of m.messages) {
+      if (!msg.message || msg.key.fromMe || msg.key.remoteJid === "status@broadcast") continue;
+      await handleMessage(sock, msg);
+    }
+    return;
+  }
+
+  // If this is an array of messages
+  if (Array.isArray(m)) {
+    for (const msg of m) {
+      if (!msg.message || msg.key.fromMe || msg.key.remoteJid === "status@broadcast") continue;
+      await handleMessage(sock, msg);
+    }
+    return;
+  }
+
+  // If this is a single message
+  if (m.message) {
+    if (!m.key.fromMe && m.key.remoteJid !== "status@broadcast") {
+      await handleMessage(sock, m);
+    }
+  }
+}
+
+// Optional stubs for other handlers your code might expect
+async function handleGroupParticipantsUpdate(sock, update) {
+  console.log("👥 Group participant update:", update);
+}
+
+async function handleStatus(sock, status) {
+  console.log("📢 Status update:", status);
+}
+
+// ===== Bot Startup =====
 async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState("session");
   const sock = makeWASocket({
@@ -132,11 +171,23 @@ async function startBot() {
 
   sock.ev.on("creds.update", saveCreds);
 
-  sock.ev.on("messages.upsert", async (m) => {
-    const msg = m.messages[0];
-    if (!msg.message || msg.key.fromMe) return;
-    await handleMessage(sock, msg);
+  // New style listener for Baileys v6+
+  sock.ev.on("messages.upsert", async ({ messages, type }) => {
+    await handleMessages(sock, { messages, type });
   });
+
+  console.log("✅ Bot started successfully!");
 }
 
-module.exports = { startBot, handleMessage };
+module.exports = {
+  startBot,
+  handleMessage,
+  handleMessages,
+  handleGroupParticipantsUpdate,
+  handleStatus,
+};
+
+// Auto-start bot if run directly
+if (require.main === module) {
+  startBot();
+          }
