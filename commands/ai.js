@@ -1,102 +1,81 @@
 const axios = require('axios');
 const fetch = require('node-fetch');
 
-const DEV_NAME = 'Mr Dev Prime';  // Hardcoded dev name
+const DEV_NAME = 'Mr Dev Prime';
+const CHANNEL_LINK = 'https://whatsapp.com/channel/0029VaJvXM9E5jQzI8kzE03K'; // Your channel link
 
 module.exports = {
   name: 'ai',
   alias: ['gpt', 'gemini'],
   description: 'Ask AI (GPT or Gemini) questions',
+  
   async execute(sock, chatId, message, args) {
     try {
       const text = message.message?.conversation || message.message?.extendedTextMessage?.text;
-
+      
       if (!text) {
         return await sock.sendMessage(chatId, { 
-          text: `Please provide a question after .gpt or .gemini\n\nExample: .gpt write a basic html code\n\n_Developed by ${DEV_NAME}_`
+          text: `❗ Please provide a question after .gpt or .gemini\n\nExample: .gpt write a basic HTML code\n\n_Developed by ${DEV_NAME}_\n📢 Channel: ${CHANNEL_LINK}`
         });
       }
 
-      // Get the command and query
-      const parts = text.split(' ');
+      const parts = text.trim().split(' ');
       const command = parts[0].toLowerCase();
       const query = parts.slice(1).join(' ').trim();
 
       if (!query) {
         return await sock.sendMessage(chatId, { 
-          text: `Please provide a question after .gpt or .gemini\n\n_Developed by ${DEV_NAME}_`
+          text: `❗ Please provide a question after .gpt or .gemini\n\n_Developed by ${DEV_NAME}_\n📢 Channel: ${CHANNEL_LINK}`
         });
       }
 
-      try {
-        // Show processing reaction
-        await sock.sendMessage(chatId, {
-          react: { text: '🤖', key: message.key }
-        });
+      await sock.sendMessage(chatId, { react: { text: '🤖', key: message.key } });
 
-        if (command === '.gpt') {
-          // Call the GPT API
-          const response = await axios.get(`https://api.dreaded.site/api/chatgpt?text=${encodeURIComponent(query)}`);
-
-          if (response.data && response.data.success && response.data.result) {
-            const answer = response.data.result.prompt;
-            await sock.sendMessage(chatId, {
-              text: `${answer}\n\n_Developed by ${DEV_NAME}_`
-            }, {
-              quoted: message
-            });
-          } else {
-            throw new Error('Invalid response from API');
-          }
-        } else if (command === '.gemini') {
-          const apis = [
-            `https://vapis.my.id/api/gemini?q=${encodeURIComponent(query)}`,
-            `https://api.siputzx.my.id/api/ai/gemini-pro?content=${encodeURIComponent(query)}`,
-            `https://api.ryzendesu.vip/api/ai/gemini?text=${encodeURIComponent(query)}`,
-            `https://api.dreaded.site/api/gemini2?text=${encodeURIComponent(query)}`,
-            `https://api.giftedtech.my.id/api/ai/geminiai?apikey=gifted&q=${encodeURIComponent(query)}`,
-            `https://api.giftedtech.my.id/api/ai/geminiaipro?apikey=gifted&q=${encodeURIComponent(query)}`
-          ];
-
-          for (const api of apis) {
-            try {
-              const response = await fetch(api);
-              const data = await response.json();
-
-              if (data.message || data.data || data.answer || data.result) {
-                const answer = data.message || data.data || data.answer || data.result;
-                await sock.sendMessage(chatId, {
-                  text: `${answer}\n\n_Developed by ${DEV_NAME}_`
-                }, {
-                  quoted: message
-                });
-                return;
-              }
-            } catch {
-              continue;
-            }
-          }
-          throw new Error('All Gemini APIs failed');
+      if (command === '.gpt') {
+        // GPT API
+        const response = await axios.get(`https://api.dreaded.site/api/chatgpt?text=${encodeURIComponent(query)}`);
+        if (response.data?.success && response.data.result?.prompt) {
+          return await sock.sendMessage(chatId, {
+            text: `${response.data.result.prompt}\n\n_Developed by ${DEV_NAME}_\n📢 Channel: ${CHANNEL_LINK}`
+          }, { quoted: message });
+        } else {
+          throw new Error('Invalid GPT API response');
         }
-      } catch (error) {
-        console.error('API Error:', error);
-        await sock.sendMessage(chatId, {
-          text: `❌ Failed to get response. Please try again later.\n\n_Developed by ${DEV_NAME}_`,
-          contextInfo: {
-            mentionedJid: [message.key.participant || message.key.remoteJid],
-            quotedMessage: message.message
-          }
-        });
       }
+
+      if (command === '.gemini') {
+        // Gemini APIs fallback
+        const apis = [
+          `https://vapis.my.id/api/gemini?q=${encodeURIComponent(query)}`,
+          `https://api.siputzx.my.id/api/ai/gemini-pro?content=${encodeURIComponent(query)}`,
+          `https://api.ryzendesu.vip/api/ai/gemini?text=${encodeURIComponent(query)}`,
+          `https://api.dreaded.site/api/gemini2?text=${encodeURIComponent(query)}`,
+          `https://api.giftedtech.my.id/api/ai/geminiai?apikey=gifted&q=${encodeURIComponent(query)}`,
+          `https://api.giftedtech.my.id/api/ai/geminiaipro?apikey=gifted&q=${encodeURIComponent(query)}`
+        ];
+
+        for (const api of apis) {
+          try {
+            const res = await fetch(api);
+            const data = await res.json();
+            const answer = data.message || data.data || data.answer || data.result;
+            if (answer) {
+              return await sock.sendMessage(chatId, {
+                text: `${answer}\n\n_Developed by ${DEV_NAME}_\n📢 Channel: ${CHANNEL_LINK}`
+              }, { quoted: message });
+            }
+          } catch {
+            continue;
+          }
+        }
+        throw new Error('All Gemini APIs failed');
+      }
+
     } catch (error) {
       console.error('AI Command Error:', error);
       await sock.sendMessage(chatId, {
-        text: `❌ An error occurred. Please try again later.\n\n_Developed by ${DEV_NAME}_`,
-        contextInfo: {
-          mentionedJid: [message.key.participant || message.key.remoteJid],
-          quotedMessage: message.message
-        }
-      });
+        text: `❌ Failed to get AI response. Please try again later.\n\n_Developed by ${DEV_NAME}_\n📢 Channel: ${CHANNEL_LINK}`
+      }, { quoted: message });
     }
   }
 };
