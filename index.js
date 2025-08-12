@@ -1,5 +1,4 @@
-// Load global settings
-require('./setting');
+require('./setting'); // Load global settings
 
 const fs = require('fs');
 const path = require('path');
@@ -17,7 +16,6 @@ const {
   handleMessages,
   handleGroupParticipantUpdate,
   handleStatus,
-  startBot: startMainBot,
 } = require('./main');
 
 const config = require('./config');
