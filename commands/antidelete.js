@@ -1,21 +1,20 @@
 const fs = require('fs');
 const path = require('path');
+const settings = require('../settings'); // ⬅ Added so botName & channel can be used
 const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
 const { writeFile } = require('fs/promises');
 
-// Developer Tag (Non-editable)
-const DEV_TAG = '*👨‍💻 Created by Mr Dev Prime*';
+// Developer Tag (Dynamic from settings)
+const DEV_TAG = `*💠 ${settings.botName}*\n👨‍💻 Created by 𝐌𝐑ܮ𝐃𝐄𝐕『ᴾᴿᴵ́ᴹᴱ́』\n🔗 Channel: ${settings.channel}`;
 
 const messageStore = new Map();
 const CONFIG_PATH = path.join(__dirname, '../data/antidelete.json');
 const TEMP_MEDIA_DIR = path.join(__dirname, '../tmp');
 
-// Ensure tmp dir exists
 if (!fs.existsSync(TEMP_MEDIA_DIR)) {
     fs.mkdirSync(TEMP_MEDIA_DIR, { recursive: true });
 }
 
-// Function to get folder size in MB
 const getFolderSizeInMB = (folderPath) => {
     try {
         const files = fs.readdirSync(folderPath);
@@ -33,7 +32,6 @@ const getFolderSizeInMB = (folderPath) => {
     }
 };
 
-// Function to clean temp folder if size exceeds 100MB
 const cleanTempFolderIfLarge = () => {
     try {
         const sizeMB = getFolderSizeInMB(TEMP_MEDIA_DIR);
@@ -48,10 +46,8 @@ const cleanTempFolderIfLarge = () => {
     }
 };
 
-// Cleanup every 1 minute
 setInterval(cleanTempFolderIfLarge, 60 * 1000);
 
-// Load & Save Config
 function loadAntideleteConfig() {
     try {
         if (!fs.existsSync(CONFIG_PATH)) return { enabled: false };
@@ -60,6 +56,7 @@ function loadAntideleteConfig() {
         return { enabled: false };
     }
 }
+
 function saveAntideleteConfig(config) {
     try {
         fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
@@ -68,7 +65,6 @@ function saveAntideleteConfig(config) {
     }
 }
 
-// Command Handler
 async function handleAntideleteCommand(sock, chatId, message, match) {
     if (!message.key.fromMe) {
         return sock.sendMessage(chatId, { text: '*Only the bot owner can use this command.*' }, { quoted: message });
@@ -94,7 +90,6 @@ async function handleAntideleteCommand(sock, chatId, message, match) {
     return sock.sendMessage(chatId, { text: `${DEV_TAG}\n\n*Antidelete ${match === 'on' ? 'enabled' : 'disabled'}*` }, { quoted: message });
 }
 
-// Store incoming messages
 async function storeMessage(message) {
     try {
         const config = loadAntideleteConfig();
@@ -145,7 +140,6 @@ async function storeMessage(message) {
     }
 }
 
-// Handle message deletion
 async function handleMessageRevocation(sock, revocationMessage) {
     try {
         const config = loadAntideleteConfig();
