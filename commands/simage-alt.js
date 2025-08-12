@@ -1,7 +1,15 @@
-var { downloadContentFromMessage } = require('@whiskeysockets/baileys');
-var { exec } = require('child_process');
-var fs = require('fs');
-const ffmpeg = require('ffmpeg-static');
+// commands/simage-alt.js
+const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
+const { exec } = require('child_process');
+const fs = require('fs');
+
+let ffmpeg;
+try {
+    ffmpeg = require('ffmpeg-static'); // safer import
+} catch (err) {
+    console.error("⚠ ffmpeg-static is not installed. Run: npm install ffmpeg-static");
+    ffmpeg = null;
+}
 
 async function simageCommand(sock, quotedMessage, chatId) {
     try {
@@ -10,38 +18,37 @@ async function simageCommand(sock, quotedMessage, chatId) {
             return;
         }
 
-        const stream = await downloadContentFromMessage(quotedMessage.stickerMessage, 'sticker');
-        let buffer = Buffer.from([]);
-        for await (const chunk of stream) {
-            buffer = Buffer.concat([buffer, chunk]);
+        if (!ffmpeg) {
+            await sock.sendMessage(chatId, { text: 'FFmpeg is missing. Install it with: npm install ffmpeg-static' });
+            return;
         }
 
-        const tempSticker = `/app/temp/temp_${Date.now()}.webp`;
-        const tempOutput = `/app/temp/image_${Date.now()}.png`;
-        
-        fs.writeFileSync(tempSticker, buffer);
+        const stream = await downloadContentFromMessage(quotedMessage.stickerMessage, 'sticker');
+        const buffer = [];
+        for await (const chunk of stream) buffer.push(chunk);
+        const stickerPath = './temp_sticker.webp';
+        fs.writeFileSync(stickerPath, Buffer.concat(buffer));
 
-        // Convert webp to png using ffmpeg
-        await new Promise((resolve, reject) => {
-            exec(`${ffmpeg} -i ${tempSticker} ${tempOutput}`, (error) => {
-                if (error) reject(error);
-                else resolve();
-            });
+        const imagePath = './temp_image.png';
+        exec(`"${ffmpeg}" -i ${stickerPath} ${imagePath}`, async (err) => {
+            if (err) {
+                console.error(err);
+                await sock.sendMessage(chatId, { text: 'Error converting sticker to image.' });
+                return;
+            }
+
+            const imageBuffer = fs.readFileSync(imagePath);
+            await sock.sendMessage(chatId, { image: imageBuffer });
+
+            // Clean up
+            fs.unlinkSync(stickerPath);
+            fs.unlinkSync(imagePath);
         });
-
-        await sock.sendMessage(chatId, { 
-            image: fs.readFileSync(tempOutput),
-            caption: '✨ Here\'s your image!' 
-        });
-
-        // Cleanup
-        fs.unlinkSync(tempSticker);
-        fs.unlinkSync(tempOutput);
 
     } catch (error) {
-        console.error('Error in simage command:', error);
-        await sock.sendMessage(chatId, { text: 'Failed to convert sticker to image!' });
+        console.error(error);
+        await sock.sendMessage(chatId, { text: 'An error occurred while processing your sticker.' });
     }
 }
 
-module.exports = simageCommand; 
+module.exports = simageCommand;
