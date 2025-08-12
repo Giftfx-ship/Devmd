@@ -1,5 +1,9 @@
 const settings = require('../settings');
 
+const channelInfo = {
+    footer: "Created by Mr Dev Prime"
+};
+
 async function ownerCommand(sock, chatId) {
     const vcard = `
 BEGIN:VCARD
@@ -11,6 +15,7 @@ END:VCARD
 
     await sock.sendMessage(chatId, {
         contacts: { displayName: settings.botOwner, contacts: [{ vcard }] },
+        ...channelInfo
     });
 }
 
