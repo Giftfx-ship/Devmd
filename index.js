@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 const pino = require('pino');
+const simpleGit = require('simple-git');
 const {
   default: makeWASocket,
   useMultiFileAuthState,
@@ -17,8 +18,8 @@ const {
 const { handleMessages, handleGroupParticipantUpdate, handleStatus } = require('./main'); // your commands
 
 const sessionFolder = path.resolve('./session');
+const git = simpleGit();
 
-// ======== Console Banner ========
 function showBanner() {
   console.clear();
   console.log(chalk.cyan.bold("══════════════════════════════════════════"));
@@ -26,9 +27,13 @@ function showBanner() {
   console.log(chalk.cyan.bold("══════════════════════════════════════════\n"));
 }
 
-// ======== Start Bot ========
 async function startBot() {
   showBanner();
+
+  // Ensure session folder exists or create it on the fly (won't crash if missing)
+  if (!fs.existsSync(sessionFolder)) {
+    fs.mkdirSync(sessionFolder, { recursive: true });
+  }
 
   // Load or create auth state
   const { state, saveCreds } = await useMultiFileAuthState(sessionFolder);
@@ -37,7 +42,7 @@ async function startBot() {
   const sock = makeWASocket({
     version,
     logger: pino({ level: 'silent' }),
-    printQRInTerminal: false, // disable QR ascii printing
+    printQRInTerminal: false,
     auth: {
       creds: state.creds,
       keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'fatal' }).child({ level: 'fatal' })),
@@ -50,7 +55,7 @@ async function startBot() {
   sock.ev.on('creds.update', saveCreds);
 
   sock.ev.on('connection.update', (update) => {
-    const { qr, ref, connection, lastDisconnect } = update;
+    const { ref, connection } = update;
 
     if (ref) {
       console.log(chalk.green(`\n🔢 Your 6-digit pairing code is: ${ref}\n`));
@@ -67,14 +72,8 @@ async function startBot() {
     }
 
     if (connection === 'close') {
-      const statusCode = lastDisconnect?.error?.output?.statusCode;
-      if (statusCode === 401) {
-        console.log(chalk.red('❌ Unauthorized! Delete the ./session folder and restart the bot.'));
-        process.exit(0);
-      } else {
-        console.log(chalk.yellow('🔄 Disconnected unexpectedly, reconnecting...'));
-        startBot();
-      }
+      // Silent reconnect on disconnect without error message spam
+      startBot();
     }
   });
 
@@ -101,6 +100,27 @@ async function startBot() {
       console.error('Error handling status update:', e);
     }
   });
+
+  // Silent auto-update check — logs only when update is pulled
+  async function checkForUpdates() {
+    try {
+      await git.fetch();
+      const status = await git.status();
+      if (status.behind > 0) {
+        console.log(chalk.blue('🔄 Update detected! Pulling latest changes from GitHub...'));
+        await git.pull();
+        console.log(chalk.green('✅ Bot updated. Restarting...'));
+        process.exit(0); // restart bot with latest code
+      }
+      // No logs if no updates
+    } catch (err) {
+      // Optional: silently ignore fetch errors (or log if you want)
+      // console.error('Update check failed:', err.message);
+    }
+  }
+
+  setInterval(checkForUpdates, 10 * 60 * 1000); // every 10 minutes
+  checkForUpdates(); // initial check on start
 }
 
 startBot().catch(e => {
@@ -108,6 +128,5 @@ startBot().catch(e => {
   process.exit(1);
 });
 
-// Catch global errors
 process.on('uncaughtException', e => console.error('Uncaught Exception:', e));
 process.on('unhandledRejection', e => console.error('Unhandled Rejection:', e));
