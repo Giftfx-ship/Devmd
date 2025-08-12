@@ -45,7 +45,8 @@ global.commands = {
     "github",
     "meme",
     "fact",
-    "joke"
+    "joke",
+    "viewonce"   // Added viewonce command here
   ],
   ai: [
     "ai <query>",
