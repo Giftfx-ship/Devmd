@@ -1,4 +1,3 @@
-const axios = require('axios');
 const { channelInfo } = require('../lib/messageConfig');
 
 async function characterCommand(sock, chatId, message) {
@@ -15,19 +14,19 @@ async function characterCommand(sock, chatId, message) {
     
     if (!userToAnalyze) {
         await sock.sendMessage(chatId, { 
-            text: 'Please mention someone or reply to their message to analyze their character!', 
+            text: '❌ Please mention someone or reply to their message to analyze their character!\n\n*Created by Mr Dev Prime*', 
             ...channelInfo 
         });
         return;
     }
 
     try {
-        // Get user's profile picture
+        // Get user's profile picture or fallback
         let profilePic;
         try {
             profilePic = await sock.profilePictureUrl(userToAnalyze, 'image');
         } catch {
-            profilePic = 'https://i.imgur.com/2wzGhpF.jpeg'; // Default image if no profile pic
+            profilePic = 'https://i.imgur.com/2wzGhpF.jpeg';
         }
 
         const traits = [
@@ -39,30 +38,31 @@ async function characterCommand(sock, chatId, message) {
             "Sincere", "Thoughtful", "Understanding", "Versatile", "Wise"
         ];
 
-        // Get 3-5 random traits
-        const numTraits = Math.floor(Math.random() * 3) + 3; // Random number between 3 and 5
+        // Pick 3–5 unique random traits
+        const numTraits = Math.floor(Math.random() * 3) + 3;
         const selectedTraits = [];
-        for (let i = 0; i < numTraits; i++) {
+        while (selectedTraits.length < numTraits) {
             const randomTrait = traits[Math.floor(Math.random() * traits.length)];
             if (!selectedTraits.includes(randomTrait)) {
                 selectedTraits.push(randomTrait);
             }
         }
 
-        // Calculate random percentages for each trait
+        // Assign random percentages
         const traitPercentages = selectedTraits.map(trait => {
-            const percentage = Math.floor(Math.random() * 41) + 60; // Random number between 60-100
+            const percentage = Math.floor(Math.random() * 41) + 60; // 60–100%
             return `${trait}: ${percentage}%`;
         });
 
-        // Create character analysis message
+        // Build message
         const analysis = `🔮 *Character Analysis* 🔮\n\n` +
-            `👤 *User:* ${userToAnalyze.split('@')[0]}\n\n` +
+            `👤 *User:* @${userToAnalyze.split('@')[0]}\n\n` +
             `✨ *Key Traits:*\n${traitPercentages.join('\n')}\n\n` +
             `🎯 *Overall Rating:* ${Math.floor(Math.random() * 21) + 80}%\n\n` +
-            `Note: This is a fun analysis and should not be taken seriously!`;
+            `💡 Note: This is a fun analysis and should not be taken seriously!\n\n` +
+            `*Created by Mr Dev Prime*`;
 
-        // Send the analysis with the user's profile picture
+        // Send message with picture
         await sock.sendMessage(chatId, {
             image: { url: profilePic },
             caption: analysis,
@@ -71,12 +71,12 @@ async function characterCommand(sock, chatId, message) {
         });
 
     } catch (error) {
-        console.error('Error in character command:', error);
+        console.error('❌ Error in character command:', error);
         await sock.sendMessage(chatId, { 
-            text: 'Failed to analyze character! Try again later.',
+            text: `❌ Failed to analyze character!\n${error.message}\n\n*Created by Mr Dev Prime*`,
             ...channelInfo 
         });
     }
 }
 
-module.exports = characterCommand; 
+module.exports = characterCommand;
