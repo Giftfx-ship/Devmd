@@ -32,8 +32,8 @@ ${prefix}antilink off
                     return;
                 }
                 const result = await setAntilink(chatId, 'on', 'delete');
-                await sock.sendMessage(chatId, { 
-                    text: result ? '*_Antilink has been turned ON_*' : '*_Failed to turn on Antilink_*' 
+                await sock.sendMessage(chatId, {
+                    text: result ? '*_Antilink has been turned ON_*' : '*_Failed to turn on Antilink_*'
                 });
                 break;
 
@@ -44,29 +44,29 @@ ${prefix}antilink off
 
             case 'set':
                 if (args.length < 2) {
-                    await sock.sendMessage(chatId, { 
-                        text: `*_Please specify an action: ${prefix}antilink set delete | kick | warn_*` 
+                    await sock.sendMessage(chatId, {
+                        text: `*_Please specify an action: ${prefix}antilink set delete | kick | warn_*`
                     });
                     return;
                 }
                 const setAction = args[1];
                 if (!['delete', 'kick', 'warn'].includes(setAction)) {
-                    await sock.sendMessage(chatId, { 
-                        text: '*_Invalid action. Choose delete, kick, or warn._*' 
+                    await sock.sendMessage(chatId, {
+                        text: '*_Invalid action. Choose delete, kick, or warn._*'
                     });
                     return;
                 }
                 const setResult = await setAntilink(chatId, 'on', setAction);
-                await sock.sendMessage(chatId, { 
-                    text: setResult ? `*_Antilink action set to ${setAction}_*` : '*_Failed to set Antilink action_*' 
+                await sock.sendMessage(chatId, {
+                    text: setResult ? `*_Antilink action set to ${setAction}_*` : '*_Failed to set Antilink action_*'
                 });
                 break;
 
             case 'get':
                 const status = await getAntilink(chatId, 'on');
                 const actionConfig = await getAntilink(chatId, 'on');
-                await sock.sendMessage(chatId, { 
-                    text: `*_Antilink Configuration:_*\nStatus: ${status ? 'ON' : 'OFF'}\nAction: ${actionConfig ? actionConfig.action : 'Not set'}\n\n*Created by: Dev Prime*` 
+                await sock.sendMessage(chatId, {
+                    text: `*_Antilink Configuration:_*\nStatus: ${status ? 'ON' : 'OFF'}\nAction: ${actionConfig ? actionConfig.action : 'Not set'}\n\n*Created by: Dev Prime*`
                 });
                 break;
 
@@ -80,8 +80,8 @@ ${prefix}antilink off
 }
 
 async function handleLinkDetection(sock, chatId, message, userMessage, senderId) {
-    const antilinkSetting = getAntilinkSetting(chatId);
-    if (antilinkSetting === 'off') return;
+    const config = await getAntilink(chatId, 'on'); // FIXED: use real getter
+    if (!config || !config.enabled) return;
 
     let shouldDelete = false;
 
@@ -92,15 +92,10 @@ async function handleLinkDetection(sock, chatId, message, userMessage, senderId)
         allLinks: /https?:\/\/[^\s]+/,
     };
 
-    if (antilinkSetting === 'whatsappGroup') {
-        if (linkPatterns.whatsappGroup.test(userMessage)) {
-            shouldDelete = true;
-        }
-    } else if (antilinkSetting === 'whatsappChannel' && linkPatterns.whatsappChannel.test(userMessage)) {
-        shouldDelete = true;
-    } else if (antilinkSetting === 'telegram' && linkPatterns.telegram.test(userMessage)) {
-        shouldDelete = true;
-    } else if (antilinkSetting === 'allLinks' && linkPatterns.allLinks.test(userMessage)) {
+    if (linkPatterns.whatsappGroup.test(userMessage) ||
+        linkPatterns.whatsappChannel.test(userMessage) ||
+        linkPatterns.telegram.test(userMessage) ||
+        linkPatterns.allLinks.test(userMessage)) {
         shouldDelete = true;
     }
 
@@ -117,9 +112,9 @@ async function handleLinkDetection(sock, chatId, message, userMessage, senderId)
         }
 
         const mentionedJidList = [senderId];
-        await sock.sendMessage(chatId, { 
-            text: `Warning! @${senderId.split('@')[0]}, posting links is not allowed.\n\n*Created by: Dev Prime*`, 
-            mentions: mentionedJidList 
+        await sock.sendMessage(chatId, {
+            text: `Warning! @${senderId.split('@')[0]}, posting links is not allowed.\n\n*Created by: Dev Prime*`,
+            mentions: mentionedJidList
         });
     }
 }
