@@ -4,11 +4,13 @@
 
 const fs = require('fs');
 
-global.owner = ["2349164624021"]; // Developer contact in international format
+global.owner = ["2349164624021"];
 global.ownerName = "𝐌𝐑ܮ𝐃𝐄𝐕『ᴾᴿᴵ́ᴹᴱ́』";
 global.botName = "DEVMD";
 global.github = "https://github.com/Giftfx-ship/Devmd";
 global.channel = "https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F";
+global.prefix = "."; // Bot prefix
+global.ownerContactLink = "https://wa.me/2349164624021";
 
 // Alive & Welcome messages
 global.aliveMessage = `Hello! I am *${global.botName}*, created by ${global.ownerName}`;
@@ -18,7 +20,7 @@ global.goodbyeMessage = `Goodbye! Hope to see you again.`;
 // Pairing mode default (no QR, always code)
 global.pairingCode = true;
 
-// Command categories (used in help.js)
+// Command categories
 global.commands = {
   owner: [
     "autoviewstatus",
@@ -58,7 +60,7 @@ global.commands = {
   ]
 };
 
-// File Watcher (Reload settings when changed)
+// Reload on changes
 let file = require.resolve(__filename);
 fs.watchFile(file, () => {
   fs.unwatchFile(file);
