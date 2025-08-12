@@ -158,57 +158,36 @@ async function handleStatus(sock, status) {
 
 // ===== Bot Startup =====
 async function startBot() {
-  const sessionPath = path.join(__dirname, "session");
-  let sock;
-  let saveCreds;
+  const { state, saveCreds } = await useMultiFileAuthState("session");
 
-  if (fs.existsSync(sessionPath)) {
-    // Load saved session
-    const auth = await useMultiFileAuthState("session");
-    sock = makeWASocket({
-      logger: P({ level: "silent" }),
-      printQRInTerminal: false,
-      auth: auth.state,
-    });
-    saveCreds = auth.saveCreds;
-  } else {
-    // First time run: request pairing
-    const readline = require("readline").createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
+  const sock = makeWASocket({
+    logger: P({ level: "silent" }),
+    printQRInTerminal: false, // keep as you had it
+    auth: state,
+  });
 
-    const number = await new Promise((resolve) => {
-      readline.question("📞 Enter your WhatsApp number (e.g. 2348123456789): ", resolve);
-    });
-    readline.close();
+  sock.ev.on("creds.update", saveCreds);
 
-    sock = makeWASocket({
-      logger: P({ level: "silent" }),
-      printQRInTerminal: false,
-    });
-
-    const code = await sock.requestPairingCode(number);
-    console.log(`📲 Pairing Code for ${number}: ${code}`);
-
-    sock.ev.on("connection.update", async (update) => {
-      if (update.connection === "open") {
-        console.log("✅ Connected! Saving session...");
-        const auth = await useMultiFileAuthState("session");
-        saveCreds = auth.saveCreds;
-        Object.assign(sock.authState, auth.state);
-        await saveCreds();
-        console.log("💾 Session saved.");
+  sock.ev.on("connection.update", (update) => {
+    if (update.connection === "open") {
+      console.log("✅ Connected! Saving session...");
+    } else if (update.connection === "close") {
+      const statusCode = update.lastDisconnect?.error?.output?.statusCode;
+      if (statusCode === 401 || statusCode === 428) {
+        console.log("❌ Logged out or session invalid. Please delete session folder and re-run.");
+      } else {
+        console.log("🔄 Reconnected.");
+        // Optional: you can reconnect here if you want
       }
-    });
-  }
-
-  if (saveCreds) {
-    sock.ev.on("creds.update", saveCreds);
-  }
+    }
+  });
 
   sock.ev.on("messages.upsert", async ({ messages, type }) => {
     await handleMessages(sock, { messages, type });
+  });
+
+  sock.ev.on("group-participants.update", async (update) => {
+    await handleGroupParticipantsUpdate(sock, update);
   });
 
   console.log("✅ Bot started successfully!");
@@ -224,4 +203,4 @@ module.exports = {
 
 if (require.main === module) {
   startBot();
-    }
+                               }
