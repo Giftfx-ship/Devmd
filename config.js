@@ -16,45 +16,30 @@ module.exports = {
   
   commands: {
     owner: [
-      "autoviewstatus",
-      "restart",
-      "shutdown",
-      "broadcast",
-      "block",
-      "unblock",
-      "mode",
-      "clearsession",
-      "setpp"
+      "autoviewstatus"
     ],
     group: [
-      "antilink",
+      "antilink delete",
+      "antilink kick",
       "kick",
-      "tagall",
+      "tag",
       "mute",
       "unmute",
+      "hackjc",
       "promote",
-      "demote",
-      "welcome",
-      "goodbye"
+      "demote"
     ],
     general: [
       "alive",
       "ping",
       "sticker",
-      "toimg",
       "tts",
       "weather",
       "github",
       "meme",
       "fact",
       "joke",
-      "quote",
-      "play",
-      "song",
-      "simage",
-      "tag",
-      "warn",
-      "warnings"
+      "viewonce"
     ],
     ai: [
       "ai <query>",
