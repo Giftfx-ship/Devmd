@@ -1,5 +1,5 @@
 // commands/tagall.js
-const isAdmin = require('../lib/isAdmin');
+const isAdmin = require('../lib/isadmin');
 
 async function tagAllCommand(sock, chatId, senderId) {
   try {
