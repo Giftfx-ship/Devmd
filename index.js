@@ -22,7 +22,7 @@ const {
 
 const { handleMessages, handleGroupParticipantUpdate, handleStatus } = require('./main') // your main file with commands
 
-// Create readline interface to ask for phone number every time
+// Create readline interface
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -30,43 +30,44 @@ const rl = readline.createInterface({
 
 const question = (text) => new Promise(resolve => rl.question(text, resolve))
 
-async function startBot() {
-    // Always fetch latest Baileys version for compatibility
-    const { version, isLatest } = await fetchLatestBaileysVersion()
-
-    // Use multi-file auth state for session saving in ./session folder
+async function startBot(isReconnect = false) {
+    const { version } = await fetchLatestBaileysVersion()
     const { state, saveCreds } = await useMultiFileAuthState('./session')
-
     const msgRetryCounterCache = new NodeCache()
 
     const sock = makeWASocket({
         version,
         logger: pino({ level: 'silent' }),
-        printQRInTerminal: false, // We handle pairing code manually
+        printQRInTerminal: false,
         auth: {
             creds: state.creds,
             keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'fatal' }).child({ level: 'fatal' }))
         },
         markOnlineOnConnect: true,
         generateHighQualityLinkPreview: true,
-        getMessage: async key => {
-            // You can implement store loading messages if needed
-            return ''
-        },
-        msgRetryCounterCache,
+        getMessage: async () => ''
     })
 
-    // Bind events to store or cache here if needed (optional)
-
-    // Listen for connection updates
     sock.ev.on('connection.update', async (update) => {
         const { connection, lastDisconnect } = update
         if (connection === 'open') {
-            console.log(chalk.green.bold(`✅ Connected as ${sock.user.id}`))
+            console.clear();
+            console.log(chalk.cyan.bold("══════════════════════════════════════════"));
+            console.log(chalk.magenta.bold("          𝐃𝐄𝐕𝐌𝐃 𝐖𝐡𝐚𝐭𝐬𝐀𝐩𝐩 𝐁𝐨𝐭"));
+            console.log(chalk.green.bold(`        ✅ Bot ${isReconnect ? 'Reconnected' : 'Connected'} Successfully!`));
+            console.log(chalk.cyan.bold("══════════════════════════════════════════"));
+            console.log(chalk.yellow(`🤖 Logged in as: ${sock.user.id}`));
+            console.log(chalk.yellow(`📅 Date: ${new Date().toLocaleString()}`));
+            console.log(chalk.cyan.bold("══════════════════════════════════════════\n"));
+
+            // Send WhatsApp message to self
+            await sock.sendMessage(sock.user.id, {
+                text: `${isReconnect ? '♻️ *Bot Reconnected*' : '✅ *DEVMD Bot Connected*'}\n\n📅 ${new Date().toLocaleString()}\n🤖 Logged in as: ${sock.user.id}`
+            })
         } else if (connection === 'close') {
             if (lastDisconnect.error?.output?.statusCode !== 401) {
                 console.log(chalk.red(`Disconnected unexpectedly, reconnecting...`))
-                await startBot() // reconnect on all disconnects except auth failure
+                await startBot(true) // reconnect
             } else {
                 console.log(chalk.red(`Connection closed: Unauthorized (401). Please delete ./session and try again.`))
                 process.exit(0)
@@ -74,10 +75,8 @@ async function startBot() {
         }
     })
 
-    // Listen for creds updates and save them
     sock.ev.on('creds.update', saveCreds)
 
-    // Handle incoming messages by calling your main handler
     sock.ev.on('messages.upsert', async (m) => {
         if (!m.messages || m.messages.length === 0) return
         const msg = m.messages[0]
@@ -89,7 +88,6 @@ async function startBot() {
         }
     })
 
-    // Group participant updates
     sock.ev.on('group-participants.update', async (update) => {
         try {
             await handleGroupParticipantUpdate(sock, update)
@@ -98,7 +96,6 @@ async function startBot() {
         }
     })
 
-    // Status updates
     sock.ev.on('status.update', async (status) => {
         try {
             await handleStatus(sock, status)
@@ -107,7 +104,6 @@ async function startBot() {
         }
     })
 
-    // Messages reactions (optional)
     sock.ev.on('messages.reaction', async (reaction) => {
         try {
             await handleStatus(sock, reaction)
@@ -116,7 +112,6 @@ async function startBot() {
         }
     })
 
-    // Always ask for phone number and print pairing code on first run or if not registered
     if (!state.creds.registered) {
         rl.question(chalk.cyan('Enter your phone number with country code (e.g. 15551234567): '), async (phone) => {
             const cleanedPhone = phone.replace(/\D/g, '')
