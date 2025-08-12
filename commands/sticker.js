@@ -37,11 +37,11 @@ async function stickerCommand(sock, chatId, message) {
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
                     newsletterJid: '120363161513685998@newsletter',
-                    newsletterName: 'B͎E͎N͎Z͎I͎ C͎O͎M͎P͎A͎N͎Y͎ X͎M͎D͎',
+                    newsletterName: 'MRDEV',
                     serverMessageId: -1
                 }
             }
-        },{ quoted: messageToQuote });
+        }, { quoted: messageToQuote });
         return;
     }
 
@@ -59,7 +59,7 @@ async function stickerCommand(sock, chatId, message) {
                     isForwarded: true,
                     forwardedNewsletterMessageInfo: {
                         newsletterJid: '120363161513685998@newsletter',
-                        newsletterName: 'B͎E͎N͎Z͎I͎ C͎O͎M͎P͎A͎N͎Y͎ X͎M͎D͎',
+                        newsletterName: 'MRDEV',
                         serverMessageId: -1
                     }
                 }
@@ -109,7 +109,7 @@ async function stickerCommand(sock, chatId, message) {
         // Create metadata
         const json = {
             'sticker-pack-id': crypto.randomBytes(32).toString('hex'),
-            'sticker-pack-name': settings.packname || 'B͎E͎N͎Z͎I͎ B͎O͎T͎',
+            'sticker-pack-name': settings.packname || 'MRDEVMDBOT',
             'emojis': ['🤖']
         };
 
@@ -128,7 +128,7 @@ async function stickerCommand(sock, chatId, message) {
         // Send the sticker
         await sock.sendMessage(chatId, { 
             sticker: finalBuffer
-        },{ quoted: messageToQuote });
+        }, { quoted: messageToQuote });
 
         // Cleanup temp files
         try {
@@ -147,7 +147,7 @@ async function stickerCommand(sock, chatId, message) {
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
                     newsletterJid: '120363161513685998@newsletter',
-                    newsletterName: 'B͎E͎N͎Z͎I͎ C͎O͎M͎P͎A͎N͎Y͎ X͎M͎D͎',
+                    newsletterName: 'MR DEV',
                     serverMessageId: -1
                 }
             }
