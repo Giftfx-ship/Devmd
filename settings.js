@@ -5,7 +5,7 @@
 const fs = require('fs');
 
 global.owner = ["2349164624021"];
-global.ownerName = "𝐌𝐑ܮ𝐃𝐄𝐕『ᴾᴿᴵ́ᴹᴱ́』";
+global.ownerName = "𝐌𝐑ܮ𝐃𝐄𝐕";
 global.botName = "DEVMD";
 global.github = "https://github.com/Giftfx-ship/Devmd";
 global.channel = "https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F";
@@ -23,20 +23,15 @@ global.pairingCode = true;
 // Command categories
 global.commands = {
   owner: [
-    "autoviewstatus",
-    "restart",
-    "shutdown",
-    "broadcast",
-    "block",
-    "unblock"
+    "autoviewstatus"
   ],
   group: [
     "antilink delete",
     "antilink kick",
     "kick",
-    "tagall",
+    "tag",       // silent tagall
     "mute",
-    "open",
+    "unmute",    // open group
     "hackjc",
     "promote",
     "demote"
@@ -45,7 +40,6 @@ global.commands = {
     "alive",
     "ping",
     "sticker",
-    "toimg",
     "tts",
     "weather",
     "github",
