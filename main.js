@@ -125,7 +125,6 @@ async function handleMessage(sock, msg) {
 async function handleMessages(sock, m) {
   if (!m) return;
 
-  // If this is a Baileys upsert object
   if (m.messages && Array.isArray(m.messages)) {
     for (const msg of m.messages) {
       if (!msg.message || msg.key.fromMe || msg.key.remoteJid === "status@broadcast") continue;
@@ -134,7 +133,6 @@ async function handleMessages(sock, m) {
     return;
   }
 
-  // If this is an array of messages
   if (Array.isArray(m)) {
     for (const msg of m) {
       if (!msg.message || msg.key.fromMe || msg.key.remoteJid === "status@broadcast") continue;
@@ -143,7 +141,6 @@ async function handleMessages(sock, m) {
     return;
   }
 
-  // If this is a single message
   if (m.message) {
     if (!m.key.fromMe && m.key.remoteJid !== "status@broadcast") {
       await handleMessage(sock, m);
@@ -151,7 +148,6 @@ async function handleMessages(sock, m) {
   }
 }
 
-// Optional stubs for other handlers your code might expect
 async function handleGroupParticipantsUpdate(sock, update) {
   console.log("👥 Group participant update:", update);
 }
@@ -162,16 +158,55 @@ async function handleStatus(sock, status) {
 
 // ===== Bot Startup =====
 async function startBot() {
-  const { state, saveCreds } = await useMultiFileAuthState("session");
-  const sock = makeWASocket({
-    logger: P({ level: "silent" }),
-    printQRInTerminal: true,
-    auth: state,
-  });
+  const sessionPath = path.join(__dirname, "session");
+  let sock;
+  let saveCreds;
 
-  sock.ev.on("creds.update", saveCreds);
+  if (fs.existsSync(sessionPath)) {
+    // Load saved session
+    const auth = await useMultiFileAuthState("session");
+    sock = makeWASocket({
+      logger: P({ level: "silent" }),
+      printQRInTerminal: false,
+      auth: auth.state,
+    });
+    saveCreds = auth.saveCreds;
+  } else {
+    // First time run: request pairing
+    const readline = require("readline").createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
 
-  // New style listener for Baileys v6+
+    const number = await new Promise((resolve) => {
+      readline.question("📞 Enter your WhatsApp number (e.g. 2348123456789): ", resolve);
+    });
+    readline.close();
+
+    sock = makeWASocket({
+      logger: P({ level: "silent" }),
+      printQRInTerminal: false,
+    });
+
+    const code = await sock.requestPairingCode(number);
+    console.log(`📲 Pairing Code for ${number}: ${code}`);
+
+    sock.ev.on("connection.update", async (update) => {
+      if (update.connection === "open") {
+        console.log("✅ Connected! Saving session...");
+        const auth = await useMultiFileAuthState("session");
+        saveCreds = auth.saveCreds;
+        Object.assign(sock.authState, auth.state);
+        await saveCreds();
+        console.log("💾 Session saved.");
+      }
+    });
+  }
+
+  if (saveCreds) {
+    sock.ev.on("creds.update", saveCreds);
+  }
+
   sock.ev.on("messages.upsert", async ({ messages, type }) => {
     await handleMessages(sock, { messages, type });
   });
@@ -187,7 +222,6 @@ module.exports = {
   handleStatus,
 };
 
-// Auto-start bot if run directly
 if (require.main === module) {
   startBot();
-          }
+    }
