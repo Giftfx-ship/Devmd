@@ -1,6 +1,6 @@
 module.exports = {
   botName: "DEVMD",
-  ownerName: "𝐌𝐑ܮ𝐃𝐄𝐕『ᴾᴿᴵ́ᴹᴱ́』",
+  ownerName: "𝐌𝐑ܮ𝐃𝐄𝐕",
   ownerNumber: "2349164624021",
   ownerContactLink: `https://wa.me/2349164624021`,
   github: "https://github.com/Giftfx-ship/Devmd",
