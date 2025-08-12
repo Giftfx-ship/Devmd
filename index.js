@@ -1,8 +1,3 @@
-/**
- * DEVMD - index.js
- * Developer: 𝐌𝐑ܮ𝐃𝐄𝐕『ᴾᴿᴵ́ᴹᴱ́』
- */
-
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
@@ -15,7 +10,7 @@ const {
   fetchLatestBaileysVersion,
 } = require('@whiskeysockets/baileys');
 
-const { handleMessages, handleGroupParticipantUpdate, handleStatus } = require('./main'); // your commands
+const { handleMessages, handleGroupParticipantUpdate, handleStatus } = require('./main');
 
 const sessionFolder = path.resolve('./session');
 const git = simpleGit();
@@ -30,12 +25,10 @@ function showBanner() {
 async function startBot() {
   showBanner();
 
-  // Ensure session folder exists or create it on the fly (won't crash if missing)
   if (!fs.existsSync(sessionFolder)) {
     fs.mkdirSync(sessionFolder, { recursive: true });
   }
 
-  // Load or create auth state
   const { state, saveCreds } = await useMultiFileAuthState(sessionFolder);
   const { version } = await fetchLatestBaileysVersion();
 
@@ -72,7 +65,6 @@ async function startBot() {
     }
 
     if (connection === 'close') {
-      // Silent reconnect on disconnect without error message spam
       startBot();
     }
   });
@@ -101,7 +93,7 @@ async function startBot() {
     }
   });
 
-  // Silent auto-update check — logs only when update is pulled
+  // Auto-update checker (silent unless update found)
   async function checkForUpdates() {
     try {
       await git.fetch();
@@ -110,17 +102,16 @@ async function startBot() {
         console.log(chalk.blue('🔄 Update detected! Pulling latest changes from GitHub...'));
         await git.pull();
         console.log(chalk.green('✅ Bot updated. Restarting...'));
-        process.exit(0); // restart bot with latest code
+        process.exit(0); // Exit so pm2 restarts with new code
       }
-      // No logs if no updates
     } catch (err) {
-      // Optional: silently ignore fetch errors (or log if you want)
+      // Fail silently or uncomment to debug:
       // console.error('Update check failed:', err.message);
     }
   }
 
   setInterval(checkForUpdates, 10 * 60 * 1000); // every 10 minutes
-  checkForUpdates(); // initial check on start
+  checkForUpdates();
 }
 
 startBot().catch(e => {
