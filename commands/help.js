@@ -1,51 +1,36 @@
+// help.js
 const fs = require('fs').promises;
 const path = require('path');
-const config = require('../config'); // adjust if your config path differs
+const config = require('../config');
 
 module.exports = {
   name: 'menu',
   alias: ['help'],
   description: 'Show bot command list',
   async execute(sock, chatId, message, args) {
-    // Hardcoded developer name here - not editable via config
-    const developerName = "𝐌𝐑ܮ𝐃𝐄𝐕『ᴾᴿᴵ́ᴹᴱ́』";
+
+    let commandSections = '';
+    for (const [category, cmds] of Object.entries(config.commands)) {
+      const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
+      commandSections += `\n*${categoryName} Commands:*\n` +
+        cmds.map(cmd => `.${cmd}`).join(' | ') + '\n';
+    }
 
     const helpMessage = `
-🪐 *「 ${config.botName} 𝕏Ɽ 」* 🪐
+🪐 *「 ${config.botName} 」* 🪐
 
 ╭───❏ *STATS* ❏
-│👨‍💻 *Developer:* ${developerName}
+│👨‍💻 *Developer:* ${config.ownerName}
 │📚 *Library:* Bailey's
 │⌨️ *Prefix:* ${config.prefix}
-│🛠 *Tools:* 2500
-│💽 *RAM:* 24.93GB / 61.79GB
 │🖥 *Host:* Linux
 │📞 *Contact:* ${config.ownerContactLink}
 │🌐 *GitHub:* ${config.github.replace(/^https?:\/\//, '')}
 │📢 *Channel:* ${config.channel.replace(/^https?:\/\//, '')}
 ╰───────────────
+${commandSections}
 
-🚀 *MAIN COMMANDS*
-.menu | .ping | .runtime | .owner | .repo | .source | .grouplink | .blocklist
-
-👑 *GROUP MANAGEMENT*
-.promote | .demote | .kick | .add | .mute | .unmute | .lockgc | .unlockgc
-.tagall | .hidetag | .warn | .resetwarn | .setppgc | .delppgc
-.setnamegc | .setdesc | .invite | .ban | .unban
-
-🎯 *FUN & GAMES*
-.joke | .meme | .quote | .trivia | .tictactoe | .dice | .rps | .truth | .dare
-
-🔍 *SEARCH & TOOLS*
-.google | .wikipedia | .yts | .weather | .time | .translate | .imdb | .covid | .currency | .calc
-
-🎵 *MEDIA & DOWNLOADS*
-.play | .song | .video | .instagram | .facebook | .twitter | .tiktok | .pinterest | .soundcloud | .github
-
-🛡 *OWNER ONLY*
-.broadcast | .setppbot | .delppbot | .join | .leave | .eval | .exec | .shutdown | .restart
-
-> © 2025 ${config.botName} | ${developerName}
+> © 2025 ${config.botName} | ${config.ownerName}
 `;
 
     try {
