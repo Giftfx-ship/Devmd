@@ -2,7 +2,7 @@ const isAdmin = require('../lib/isadmin');
 
 const settings = {
   botName: 'MR DEV',
-  channel: 'https://youtube.com/@mrdev'
+  channel: 'https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F'
 };
 
 const channelInfo = {
