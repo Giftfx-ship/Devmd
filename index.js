@@ -6,8 +6,8 @@
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
-const pino = require('pino');
 const readline = require('readline');
+const pino = require('pino');
 const { spawn } = require('child_process');
 const simpleGit = require('simple-git');
 const {
@@ -29,24 +29,26 @@ function showBanner() {
   console.log(chalk.cyan.bold("══════════════════════════════════════════\n"));
 }
 
-async function askPhoneNumber() {
+// readline interface for asking phone number on first run
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+function askPhoneNumber() {
   return new Promise(resolve => {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
     rl.question('📞 Enter your WhatsApp number with country code (e.g. 2348123456789): ', (number) => {
-      rl.close();
       resolve(number.trim());
+      rl.close();
     });
   });
 }
 
-// Function to restart the bot process internally
+// Restart bot internally
 function restartBot() {
   console.log(chalk.blue('♻️ Restarting bot internally...'));
-  const nodePath = process.argv[0]; // node executable path
-  const scriptPath = process.argv[1]; // this script path
+  const nodePath = process.argv[0];
+  const scriptPath = process.argv[1];
 
   const child = spawn(nodePath, [scriptPath], {
     stdio: 'inherit',
@@ -62,18 +64,22 @@ function restartBot() {
 async function startBot() {
   showBanner();
 
+  // Check if session exists and not empty
   const sessionExists = fs.existsSync(sessionFolder) && fs.readdirSync(sessionFolder).length > 0;
 
+  // Always fetch latest Baileys version
+  const { version } = await fetchLatestBaileysVersion();
+
   if (!sessionExists) {
+    // First run: ask phone and do pairing
     const phoneNumber = await askPhoneNumber();
 
     const { state, saveCreds } = await useMultiFileAuthState(sessionFolder, { reauthenticate: true });
-    const { version } = await fetchLatestBaileysVersion();
 
     const sock = makeWASocket({
       version,
       logger: pino({ level: 'silent' }),
-      printQRInTerminal: false,
+      printQRInTerminal: false, // We'll print code manually
       auth: state,
       markOnlineOnConnect: true,
       generateHighQualityLinkPreview: true,
@@ -86,7 +92,9 @@ async function startBot() {
       const { connection, lastDisconnect, ref } = update;
 
       if (ref) {
-        console.log(chalk.green(`\n🔢 Your 6-digit pairing code is: ${ref}\n`));
+        // Show 6-digit pairing code in 4-digit blocks
+        const formattedCode = ref.match(/.{1,4}/g).join('-');
+        console.log(chalk.green(`\n🔢 Your 6-digit pairing code is: ${formattedCode}\n`));
         console.log(chalk.yellow('📌 Open WhatsApp > Linked Devices > Link a Device > Enter this code.'));
       }
 
@@ -137,8 +145,8 @@ async function startBot() {
     checkForUpdates();
 
   } else {
+    // Session exists: just load and connect
     const { state, saveCreds } = await useMultiFileAuthState(sessionFolder);
-    const { version } = await fetchLatestBaileysVersion();
 
     const sock = makeWASocket({
       version,
@@ -159,7 +167,8 @@ async function startBot() {
       const { connection, lastDisconnect, ref } = update;
 
       if (ref) {
-        console.log(chalk.green(`\n🔢 Your 6-digit pairing code is: ${ref}\n`));
+        const formattedCode = ref.match(/.{1,4}/g).join('-');
+        console.log(chalk.green(`\n🔢 Your 6-digit pairing code is: ${formattedCode}\n`));
         console.log(chalk.yellow('📌 Open WhatsApp > Linked Devices > Link a Device > Enter this code.'));
       }
 
