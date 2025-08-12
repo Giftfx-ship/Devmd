@@ -4,7 +4,7 @@ const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
 const { writeFile } = require('fs/promises');
 
 // Developer Tag (Non-editable)
-const DEV_TAG = '*👨‍💻 Created by Developer*';
+const DEV_TAG = '*👨‍💻 Created by Mr Dev Prime*';
 
 const messageStore = new Map();
 const CONFIG_PATH = path.join(__dirname, '../data/antidelete.json');
