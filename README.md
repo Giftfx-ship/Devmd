@@ -44,7 +44,7 @@ Host your DEVMD bot easily with **bothosting.com** — reliable, professional ho
 
 Stay connected, chat, and collaborate with other users here:
 
-👉 [**Join DEVMD Group Chat**](https://chat.whatsapp.com/LhkW0hPNyMEI3wIJqkJK8A?mode=ac_t)
+👉 [**Join DEVMD Group Chat**](https://chat.whatsapp.com/BXroZtMlwDJ77FB883RZyl?mode=ac_t)
 
 ---
 
