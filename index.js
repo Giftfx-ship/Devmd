@@ -11,7 +11,6 @@
  */
 // ---- GitHub Auto-Update ----
 require('./githubupdate'); // GitHub auto-update first
-const chalk = require('chalk');
 
 // Ensure session folder exists to prevent crashes
 if (!fs.existsSync('./session')) fs.mkdirSync('./session', { recursive: true });
