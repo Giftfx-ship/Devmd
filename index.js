@@ -1,15 +1,23 @@
 /**
- * DEVMD - A WhatsApp agent
- * Copyright (c) 2025 Mr dev
+ * devmd - A WhatsApp agent 
+ * Copyright (c) 2025 mr dev 
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the MIT License.
  * 
  * Credits:
  * - Baileys Library by @adiwajshing
- * - Pair Code implementation inspired by Mr dev
+ * - Pair Code implementation inspired by dev 
  */
+// ---- GitHub Auto-Update ----
+require('./githubupdate'); // GitHub auto-update first
+const fs = require('fs');
+const chalk = require('chalk');
 
+// Ensure session folder exists to prevent crashes
+if (!fs.existsSync('./session')) fs.mkdirSync('./session', { recursive: true });
+
+const settings = require('./settings'); // load bot settings when needed
 const { Boom } = require('@hapi/boom')
 const fs = require('fs')
 const chalk = require('chalk')
@@ -20,10 +28,10 @@ const { handleMessages, handleGroupParticipantUpdate, handleStatus } = require('
 const PhoneNumber = require('awesome-phonenumber')
 const { imageToWebp, videoToWebp, writeExifImg, writeExifVid } = require('./lib/exif')
 const { smsg, isUrl, generateMessageTag, getBuffer, getSizeMedia, fetch, await, sleep, reSize } = require('./lib/myfunc')
-const {
+const { 
     default: makeWASocket,
-    useMultiFileAuthState,
-    DisconnectReason,
+    useMultiFileAuthState, 
+    DisconnectReason, 
     fetchLatestBaileysVersion,
     generateForwardMessageContent,
     prepareWAMessageMedia,
@@ -44,12 +52,7 @@ const { PHONENUMBER_MCC } = require('@whiskeysockets/baileys/lib/Utils/generics'
 const { rmSync, existsSync } = require('fs')
 const { join } = require('path')
 
-// Load your settings (make sure path is correct)
-const settings = require('./settings')
-
-// **CALL YOUR GITHUB AUTO-UPDATE FILE HERE**
-require('./githubupdate')
-
+// Create a store object with required methods
 const store = {
     messages: {},
     contacts: {},
@@ -58,6 +61,7 @@ const store = {
         return {}
     },
     bind: function(ev) {
+        // Handle events
         ev.on('messages.upsert', ({ messages }) => {
             messages.forEach(msg => {
                 if (msg.key && msg.key.remoteJid) {
@@ -66,7 +70,7 @@ const store = {
                 }
             })
         })
-
+        
         ev.on('contacts.update', (contacts) => {
             contacts.forEach(contact => {
                 if (contact.id) {
@@ -74,7 +78,7 @@ const store = {
                 }
             })
         })
-
+        
         ev.on('chats.set', (chats) => {
             this.chats = chats
         })
@@ -87,30 +91,28 @@ const store = {
 let phoneNumber = "212684255286   "
 let owner = JSON.parse(fs.readFileSync('./data/owner.json'))
 
-global.botname = "DEVMD by Mr dev"
+global.botname = "devmd"
 global.themeemoji = "•"
 
+const settings = require('./settings')
 const pairingCode = !!phoneNumber || process.argv.includes("--pairing-code")
 const useMobile = process.argv.includes("--mobile")
 
+// Only create readline interface if we're in an interactive environment
 const rl = process.stdin.isTTY ? readline.createInterface({ input: process.stdin, output: process.stdout }) : null
 const question = (text) => {
     if (rl) {
         return new Promise((resolve) => rl.question(text, resolve))
     } else {
-        return Promise.resolve(phoneNumber)
+        // In non-interactive environment, use ownerNumber from settings
+        return Promise.resolve(settings.ownerNumber || phoneNumber)
     }
 }
 
+         
 async function startXeonBotInc() {
-    const sessionFolder = './session'
-    if (!fs.existsSync(sessionFolder)) {
-        fs.mkdirSync(sessionFolder, { recursive: true })
-        console.log(chalk.green(`[INFO] Created session folder at ${sessionFolder}`))
-    }
-
     let { version, isLatest } = await fetchLatestBaileysVersion()
-    const { state, saveCreds } = await useMultiFileAuthState(sessionFolder)
+    const { state, saveCreds } = await useMultiFileAuthState(`./session`)
     const msgRetryCounterCache = new NodeCache()
 
     const XeonBotInc = makeWASocket({
@@ -135,6 +137,7 @@ async function startXeonBotInc() {
 
     store.bind(XeonBotInc.ev)
 
+    // Message handling
     XeonBotInc.ev.on('messages.upsert', async chatUpdate => {
         try {
             const mek = chatUpdate.messages[0]
@@ -146,20 +149,21 @@ async function startXeonBotInc() {
             }
             if (!XeonBotInc.public && !mek.key.fromMe && chatUpdate.type === 'notify') return
             if (mek.key.id.startsWith('BAE5') && mek.key.id.length === 16) return
-
+            
             try {
                 await handleMessages(XeonBotInc, chatUpdate, true)
             } catch (err) {
                 console.error("Error in handleMessages:", err)
+                // Only try to send error message if we have a valid chatId
                 if (mek.key && mek.key.remoteJid) {
-                    await XeonBotInc.sendMessage(mek.key.remoteJid, {
+                    await XeonBotInc.sendMessage(mek.key.remoteJid, { 
                         text: '❌ An error occurred while processing your message.',
                         contextInfo: {
                             forwardingScore: 1,
                             isForwarded: true,
                             forwardedNewsletterMessageInfo: {
                                 newsletterJid: '12036316151365998@newsletter',
-                                newsletterName: 'DEVMD bot',
+                                newsletterName: 'devmd xr͎',
                                 serverMessageId: -1
                             }
                         }
@@ -171,6 +175,7 @@ async function startXeonBotInc() {
         }
     })
 
+    // Add these event handlers for better functionality
     XeonBotInc.decodeJid = (jid) => {
         if (!jid) return jid
         if (/:\d+@/gi.test(jid)) {
@@ -188,7 +193,7 @@ async function startXeonBotInc() {
 
     XeonBotInc.getName = (jid, withoutContact = false) => {
         id = XeonBotInc.decodeJid(jid)
-        withoutContact = XeonBotInc.withoutContact || withoutContact
+        withoutContact = XeonBotInc.withoutContact || withoutContact 
         let v
         if (id.endsWith("@g.us")) return new Promise(async (resolve) => {
             v = store.contacts[id] || {}
@@ -204,10 +209,11 @@ async function startXeonBotInc() {
         return (withoutContact ? '' : v.name) || v.subject || v.verifiedName || PhoneNumber('+' + jid.replace('@s.whatsapp.net', '')).getNumber('international')
     }
 
-    XeonBotInc.public = true
+    XeonBotInc.public = false
 
     XeonBotInc.serializeM = (m) => smsg(XeonBotInc, m, store)
 
+    // Handle pairing code
     if (pairingCode && !XeonBotInc.authState.creds.registered) {
         if (useMobile) throw new Error('Cannot use pairing code with mobile api')
 
@@ -215,17 +221,13 @@ async function startXeonBotInc() {
         if (!!global.phoneNumber) {
             phoneNumber = global.phoneNumber
         } else {
-            console.log(chalk.bgBlueBright.bold(`
-╔══════════════════════════════════════╗
-║          DEVMD Pairing Setup          ║
-╚══════════════════════════════════════╝
-`))
-            console.log(chalk.blueBright(`[Input] Please enter your phone number to start pairing:`))
-            phoneNumber = await question(chalk.bgBlack(chalk.greenBright(`Format: 263728036108) (without + or spaces) : `)))
+            phoneNumber = await question(chalk.bgBlack(chalk.greenBright(`Input your phone number to connect 🛰️Andromeda xr 📱\nFormat: 263728036108) (without + or spaces) : `)))
         }
 
+        // Clean the phone number - remove any non-digit characters
         phoneNumber = phoneNumber.replace(/[^0-9]/g, '')
 
+        // Validate the phone number using awesome-phonenumber
         const pn = require('awesome-phonenumber');
         if (!pn('+' + phoneNumber).isValid()) {
             console.log(chalk.red('Invalid phone number. Please enter your full international number (e.g., 15551234567 for US, 447911123456 for UK, etc.) without + or spaces.'));
@@ -245,40 +247,99 @@ async function startXeonBotInc() {
         }, 3000)
     }
 
+    // Connection handling
     XeonBotInc.ev.on('connection.update', async (s) => {
         const { connection, lastDisconnect } = s
         if (connection == "open") {
             console.log(chalk.magenta(` `))
             console.log(chalk.yellow(`🌿Connected to => ` + JSON.stringify(XeonBotInc.user, null, 2)))
-
+            
             const botNumber = XeonBotInc.user.id.split(':')[0] + '@s.whatsapp.net';
-            await XeonBotInc.sendMessage(botNumber, {
+            await XeonBotInc.sendMessage(botNumber, { 
                 text: `
-───────────────
-   DEVMD by Mr dev
-───────────────
-
-✅ BOT CONNECTED SUCCESSFULLY!
-
-⏰ Time: ${new Date().toLocaleString()}
-
-Status: Alive & Ready 🚀
-
-🌐 Channel:
-https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F
-
-───────────────
-`,
+                
+                
+                
+匚ㄖ几Ꮆ尺卂ㄒㄩㄥ卂ㄒ丨ㄖ几丂!
+\n\n devmd 𝕏Ɽ ʜᴀꜱ ʙᴇᴇɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ
+\n\n⏰ Time: ${new Date().toLocaleString()}\n
+ ꜱᴛᴀᴛᴜꜱ: ᴀʟɪᴠᴇ, ʀᴇᴀᴅʏ ꜰᴏʀ ᴛᴀᴋᴇᴏꜰꜰ ✅
+\n𝕱𝖔𝖑𝖑𝖔𝖜 𝖚𝖘 𝖋𝖔𝖗 𝖒𝖔𝖗𝖊 𝖚𝖕𝖉𝖆𝖙𝖊𝖘 
+ https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F
+ > © devmd, ᴅᴇᴠᴇʟᴏᴘᴇʀ mrdev 2025
+                `,
                 contextInfo: {
                     forwardingScore: 1,
                     isForwarded: true,
                     forwardedNewsletterMessageInfo: {
                         newsletterJid: '12036316513685998@newsletter',
-                        newsletterName: 'DEVMD bot',
+                        newsletterName: 'devmd xr͎',
                         serverMessageId: -1
                     }
                 }
-            })
+            });
 
             await delay(1999)
-            console.log(chalk.yellow("🌿 Connected successfully!"));
+            console.log(chalk.yellow(`\n\n                  ${chalk.bold.blue(`[ ${global.botname || 'devmd xr͎'} ]`)}\n\n`))
+            console.log(chalk.cyan(`< ================================================== >`))
+            console.log(chalk.magenta(`\n${global.themeemoji || '•'} YT CHANNEL: MRDEV ͎`))
+            console.log(chalk.magenta(`${global.themeemoji || '•'} GITHUB: Switchedxp `))
+            console.log(chalk.magenta(`${global.themeemoji || '•'} WA NUMBER: ${owner}`))
+            console.log(chalk.magenta(`${global.themeemoji || '•'} CREDIT: mrdev`))
+            console.log(chalk.green(`${global.themeemoji || '•'} _ _ _  Andromeda xr has achieved orbital lock. 🛰️
+connection status: successful✅`))
+        }
+        if (
+            connection === "close" &&
+            lastDisconnect &&
+            lastDisconnect.error &&
+            lastDisconnect.error.output.statusCode != 401
+        ) {
+            startXeonBotInc()
+        }
+    })
+
+    XeonBotInc.ev.on('creds.update', saveCreds)
+    
+    XeonBotInc.ev.on('group-participants.update', async (update) => {
+        await handleGroupParticipantUpdate(XeonBotInc, update);
+    });
+
+    XeonBotInc.ev.on('messages.upsert', async (m) => {
+        if (m.messages[0].key && m.messages[0].key.remoteJid === 'status@broadcast') {
+            await handleStatus(XeonBotInc, m);
+        }
+    });
+
+    XeonBotInc.ev.on('status.update', async (status) => {
+        await handleStatus(XeonBotInc, status);
+    });
+
+    XeonBotInc.ev.on('messages.reaction', async (status) => {
+        await handleStatus(XeonBotInc, status);
+    });
+
+    return XeonBotInc
+}
+
+
+// Start the bot with error handling
+startXeonBotInc().catch(error => {
+    console.error('Fatal error:', error)
+    process.exit(1)
+})
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err)
+})
+
+process.on('unhandledRejection', (err) => {
+    console.error('Unhandled Rejection:', err)
+})
+
+let file = require.resolve(__filename)
+fs.watchFile(file, () => {
+    fs.unwatchFile(file)
+    console.log(chalk.redBright(`Update ${__filename}`))
+    delete require.cache[file]
+    require(file)
+})
