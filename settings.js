@@ -32,7 +32,7 @@ global.commands = {
     "tag",       // silent tagall
     "mute",
     "unmute",    // open group
-    "hackjc",
+    "hackgc",
     "promote",
     "demote"
   ],
