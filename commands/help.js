@@ -1,13 +1,13 @@
-// help.js
 const fs = require('fs').promises;
 const path = require('path');
 const config = require('../config');
 
 module.exports = {
   name: 'menu',
-  alias: ['help'],
+  alias: ['help', 'cmd'],
   description: 'Show bot command list',
-  async execute(sock, chatId, message, args) {
+  async execute(XeonBotInc, m, args) {
+    const chatId = m.key.remoteJid;
 
     let commandSections = '';
     for (const [category, cmds] of Object.entries(config.commands)) {
@@ -53,20 +53,20 @@ ${commandSections}
 
       if (imageExists) {
         const imageBuffer = await fs.readFile(imagePath);
-        await sock.sendMessage(chatId, {
+        await XeonBotInc.sendMessage(chatId, {
           image: imageBuffer,
           caption: helpMessage,
           contextInfo,
-        }, { quoted: message });
+        }, { quoted: m });
       } else {
-        await sock.sendMessage(chatId, {
+        await XeonBotInc.sendMessage(chatId, {
           text: helpMessage,
           contextInfo,
-        }, { quoted: message });
+        }, { quoted: m });
       }
     } catch (error) {
       console.error('Error in help command:', error);
-      await sock.sendMessage(chatId, { text: helpMessage }, { quoted: message });
+      await XeonBotInc.sendMessage(chatId, { text: helpMessage }, { quoted: m });
     }
   }
 };
