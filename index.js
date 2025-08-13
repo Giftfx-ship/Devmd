@@ -48,7 +48,7 @@ const { join } = require('path')
 const settings = require('./settings')
 
 // Load GitHub auto-update separately
-require('./githubUpdate')
+require('./githubupdate')
 
 const store = {
     messages: {},
