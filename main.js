@@ -33,7 +33,16 @@ if (fs.existsSync(commandsPath)) {
         }
 
         if (executeFn) {
+          // Main command
           commands.set(name.toLowerCase(), { execute: executeFn, raw: cmdModule });
+          
+          // Alias support
+          if (cmdModule.alias && Array.isArray(cmdModule.alias)) {
+            cmdModule.alias.forEach(alias => {
+              commands.set(alias.toLowerCase(), { execute: executeFn, raw: cmdModule });
+            });
+          }
+
           console.log(`✅ Loaded command: ${name}`);
         } else {
           console.warn(`⚠️ No executable function found in ${file}`);
@@ -56,7 +65,6 @@ async function handleMessage(sock, msg) {
     msg.message?.imageMessage?.caption ||
     "";
 
-  // Normal commands
   if (messageText.startsWith(".")) {
     const args = messageText.slice(1).trim().split(/ +/);
     const cmdName = args.shift().toLowerCase();
@@ -66,7 +74,7 @@ async function handleMessage(sock, msg) {
         await commands.get(cmdName).execute(sock, msg, args);
       } catch (err) {
         console.error(`❌ Error executing command ${cmdName}:`, err);
-        await sock.sendMessage(senderId, { text: "⚠️ Error running this command." });
+        await sock.sendMessage(senderId, { text: `⚠️ Error running this command: ${err.message}` });
       }
     }
   }
@@ -153,4 +161,4 @@ module.exports = {
 
 if (require.main === module) {
   startBot();
-                  }
+                   }
