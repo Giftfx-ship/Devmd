@@ -257,13 +257,15 @@ async function startXeonBotInc() {
                 
                 
                 
-匚ㄖ几Ꮆ尺卂ㄒㄩㄥ卂ㄒ丨ㄖ几丂!
-\n\n DEVMD 𝕏Ɽ ʜᴀꜱ ʙᴇᴇɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ
-\n\n⏰ Time: ${new Date().toLocaleString()}\n
- ꜱᴛᴀᴛᴜꜱ: ᴀʟɪᴠᴇ, ʀᴇᴀᴅʏ ꜰᴏʀ ᴛᴀᴋᴇᴏꜰꜰ ✅
-\n𝕱𝖔𝖑𝖑𝖔𝖜 𝖚𝖘 𝖋𝖔𝖗 𝖒𝖔𝖗𝖊 𝖚𝖕𝖉𝖆𝖙𝖊𝖘 
- https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F
- > © DEVMD, ᴅᴇᴠᴇʟᴏᴘᴇʀ 𝐌𝐑ܮ𝐃𝐄𝐕 2025
+匚ㄖ几Ꮆ尺卂ㄒㄩㄥ卂ㄒ丨ㄖ几丂! 🚀
+\n\n💠 *DEVMD 𝕏Ɽ Connected Successfully!*
+\n⏰ *Time:* ${new Date().toLocaleString()}
+\n✅ *Status:* Alive & Ready for Takeoff
+\n\n📢 *Stay Updated:*  
+https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F
+\n💬 *Join Our Official Group:*  
+https://chat.whatsapp.com/BXroZtMlwDJ77FB883RZyl?mode=ac_t
+\n\n© 2025 *DEVMD* — made by 𝐌𝐑ܮ𝐃𝐄𝐕
                 `,
                 contextInfo: {
                     forwardingScore: 1,
