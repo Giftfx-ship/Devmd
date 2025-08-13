@@ -15,7 +15,6 @@ require('./githubupdate'); // GitHub auto-update first
 // Ensure session folder exists to prevent crashes
 if (!fs.existsSync('./session')) fs.mkdirSync('./session', { recursive: true });
 
-const settings = require('./settings'); // load bot settings when needed
 const { Boom } = require('@hapi/boom')
 const fs = require('fs')
 const chalk = require('chalk')
