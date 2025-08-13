@@ -47,7 +47,7 @@ const { join } = require('path')
 // Load your settings (make sure path is correct)
 const settings = require('./settings')
 
-// Load GitHub auto-update separately
+// **CALL YOUR GITHUB AUTO-UPDATE FILE HERE**
 require('./githubupdate')
 
 const store = {
@@ -281,67 +281,4 @@ https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F
             })
 
             await delay(1999)
-            console.log(chalk.yellow(`\n\n                  ${chalk.bold.blue(`[ ${global.botname || 'DEVMD bot'} ]`)}\n\n`))
-            console.log(chalk.cyan(`< ================================================== >`))
-            console.log(chalk.magenta(`\n${global.themeemoji || '•'} YT CHANNEL: DANNY TECH ͎`))
-            console.log(chalk.magenta(`${global.themeemoji || '•'} GITHUB: Switchedxp `))
-            console.log(chalk.magenta(`${global.themeemoji || '•'} WA NUMBER: ${owner}`))
-            console.log(chalk.magenta(`${global.themeemoji || '•'} CREDIT: zed`))
-            console.log(chalk.green(`${global.themeemoji || '•'} _ _ _  DEVMD bot has achieved orbital lock. 🛰️
-connection status: successful✅`))
-        }
-        if (
-            connection === "close" &&
-            lastDisconnect &&
-            lastDisconnect.error &&
-            lastDisconnect.error.output.statusCode != 401
-        ) {
-            startXeonBotInc()
-        }
-    })
-
-    XeonBotInc.ev.on('creds.update', saveCreds)
-
-    XeonBotInc.ev.on('group-participants.update', async (update) => {
-        await handleGroupParticipantUpdate(XeonBotInc, update);
-    });
-
-    XeonBotInc.ev.on('messages.upsert', async (m) => {
-        if (m.messages[0].key && m.messages[0].key.remoteJid === 'status@broadcast') {
-            await handleStatus(XeonBotInc, m);
-        }
-    });
-
-    XeonBotInc.ev.on('status.update', async (status) => {
-        await handleStatus(XeonBotInc, status);
-    });
-
-    XeonBotInc.ev.on('messages.reaction', async (status) => {
-        await handleStatus(XeonBotInc, status);
-    });
-
-    return XeonBotInc
-}
-
-startXeonBotInc().catch(error => {
-    console.error('Fatal error:', error)
-    process.exit(1)
-})
-process.on('uncaughtException', (err) => {
-    console.error('Uncaught Exception:', err)
-})
-process.on('unhandledRejection', (err) => {
-    console.error('Unhandled Rejection:', err)
-})
-
-let file = require.resolve(__filename)
-fs.watchFile(file, { interval: 1000 }, () => {
-    fs.unwatchFile(file)
-    console.log(chalk.redBright(`\n[Auto-Update] ${__filename} updated, reloading...`))
-    delete require.cache[file]
-    try {
-        require(file)
-    } catch (e) {
-        console.error(chalk.red('[Auto-Update] Error reloading file:'), e)
-    }
-})
+            console.log(chalk.yellow
