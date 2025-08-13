@@ -12,12 +12,11 @@
 // ---- GitHub Auto-Update ----
 require('./githubupdate'); // GitHub auto-update first
 
-// Ensure session folder exists to prevent crashes
-if (!fs.existsSync('./session')) fs.mkdirSync('./session', { recursive: true });
-
 const { Boom } = require('@hapi/boom')
-const fs = require('fs');
-console.log(fs); // ✅ Works fine
+const fs = require('fs'); // ← declare first
+
+// Now you can safely use fs
+if (!fs.existsSync('./session')) fs.mkdirSync('./session', { recursive: true });
 const chalk = require('chalk')
 const FileType = require('file-type')
 const path = require('path')
