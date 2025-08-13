@@ -48,7 +48,7 @@ const { parsePhoneNumber } = require("libphonenumber-js")
 const { PHONENUMBER_MCC } = require('@whiskeysockets/baileys/lib/Utils/generics')
 const { rmSync, existsSync } = require('fs')
 const { join } = require('path')
-
+const { commands } = require("./main");
 // Create a store object with required methods
 const store = {
     messages: {},
