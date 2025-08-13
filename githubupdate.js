@@ -15,4 +15,12 @@ async function checkgithubupdate() {
   }
 }
 
+// Initial check immediately
+checkgithubupdate()
+
+// Schedule to run every 16 hours (16 * 60 * 60 * 1000 ms)
+setInterval(() => {
+  checkgithubupdate()
+}, 16 * 60 * 60 * 1000)
+
 module.exports = { checkgithubupdate }
