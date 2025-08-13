@@ -88,7 +88,7 @@ const store = {
 let phoneNumber = "212684255286   "
 let owner = JSON.parse(fs.readFileSync('./data/owner.json'))
 
-global.botname = "devmd"
+global.botname = "DEVMD"
 global.themeemoji = "•"
 
 const settings = require('./settings')
@@ -160,7 +160,7 @@ async function startXeonBotInc() {
                             isForwarded: true,
                             forwardedNewsletterMessageInfo: {
                                 newsletterJid: '12036316151365998@newsletter',
-                                newsletterName: 'devmd xr͎',
+                                newsletterName: 'DEVMD xr͎',
                                 serverMessageId: -1
                             }
                         }
@@ -218,7 +218,7 @@ async function startXeonBotInc() {
         if (!!global.phoneNumber) {
             phoneNumber = global.phoneNumber
         } else {
-            phoneNumber = await question(chalk.bgBlack(chalk.greenBright(`Input your phone number to connect 🛰️Andromeda xr 📱\nFormat: 263728036108) (without + or spaces) : `)))
+            phoneNumber = await question(chalk.bgBlack(chalk.greenBright(`Input your phone number to connect 🛰️Devmd xr 📱\nFormat: 263728036108) (without + or spaces) : `)))
         }
 
         // Clean the phone number - remove any non-digit characters
@@ -258,32 +258,32 @@ async function startXeonBotInc() {
                 
                 
 匚ㄖ几Ꮆ尺卂ㄒㄩㄥ卂ㄒ丨ㄖ几丂!
-\n\n devmd 𝕏Ɽ ʜᴀꜱ ʙᴇᴇɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ
+\n\n DEVMD 𝕏Ɽ ʜᴀꜱ ʙᴇᴇɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ
 \n\n⏰ Time: ${new Date().toLocaleString()}\n
  ꜱᴛᴀᴛᴜꜱ: ᴀʟɪᴠᴇ, ʀᴇᴀᴅʏ ꜰᴏʀ ᴛᴀᴋᴇᴏꜰꜰ ✅
 \n𝕱𝖔𝖑𝖑𝖔𝖜 𝖚𝖘 𝖋𝖔𝖗 𝖒𝖔𝖗𝖊 𝖚𝖕𝖉𝖆𝖙𝖊𝖘 
  https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F
- > © devmd, ᴅᴇᴠᴇʟᴏᴘᴇʀ mrdev 2025
+ > © DEVMD, ᴅᴇᴠᴇʟᴏᴘᴇʀ 𝐌𝐑ܮ𝐃𝐄𝐕 2025
                 `,
                 contextInfo: {
                     forwardingScore: 1,
                     isForwarded: true,
                     forwardedNewsletterMessageInfo: {
                         newsletterJid: '12036316513685998@newsletter',
-                        newsletterName: 'devmd xr͎',
+                        newsletterName: 'DEVMD xr͎',
                         serverMessageId: -1
                     }
                 }
             });
 
             await delay(1999)
-            console.log(chalk.yellow(`\n\n                  ${chalk.bold.blue(`[ ${global.botname || 'devmd xr͎'} ]`)}\n\n`))
+            console.log(chalk.yellow(`\n\n                  ${chalk.bold.blue(`[ ${global.botname || 'DEVMD xr͎'} ]`)}\n\n`))
             console.log(chalk.cyan(`< ================================================== >`))
-            console.log(chalk.magenta(`\n${global.themeemoji || '•'} YT CHANNEL: MRDEV ͎`))
+            console.log(chalk.magenta(`\n${global.themeemoji || '•'} YT CHANNEL: 𝐌𝐑ܮ𝐃𝐄𝐕 ͎`))
             console.log(chalk.magenta(`${global.themeemoji || '•'} GITHUB: Switchedxp `))
             console.log(chalk.magenta(`${global.themeemoji || '•'} WA NUMBER: ${owner}`))
-            console.log(chalk.magenta(`${global.themeemoji || '•'} CREDIT: mrdev`))
-            console.log(chalk.green(`${global.themeemoji || '•'} _ _ _  Andromeda xr has achieved orbital lock. 🛰️
+            console.log(chalk.magenta(`${global.themeemoji || '•'} CREDIT: 𝐌𝐑ܮ𝐃𝐄𝐕`))
+            console.log(chalk.green(`${global.themeemoji || '•'} _ _ _  Devmd xr has achieved orbital lock. 🛰️
 connection status: successful✅`))
         }
         if (
