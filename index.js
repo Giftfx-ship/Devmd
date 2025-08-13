@@ -1,15 +1,15 @@
 /**
- * 𝑨𝒏𝒅𝒓𝒐𝒎𝒆𝒅𝒂 𝕏Ɽ - A WhatsApp agent 
- * Copyright (c) 2025 zed 
+ * DEVMD - A WhatsApp agent
+ * Copyright (c) 2025 Mr dev
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the MIT License.
  * 
  * Credits:
  * - Baileys Library by @adiwajshing
- * - Pair Code implementation inspired by zed 
+ * - Pair Code implementation inspired by Mr dev
  */
-require('./settings')
+
 const { Boom } = require('@hapi/boom')
 const fs = require('fs')
 const chalk = require('chalk')
@@ -20,10 +20,10 @@ const { handleMessages, handleGroupParticipantUpdate, handleStatus } = require('
 const PhoneNumber = require('awesome-phonenumber')
 const { imageToWebp, videoToWebp, writeExifImg, writeExifVid } = require('./lib/exif')
 const { smsg, isUrl, generateMessageTag, getBuffer, getSizeMedia, fetch, await, sleep, reSize } = require('./lib/myfunc')
-const { 
+const {
     default: makeWASocket,
-    useMultiFileAuthState, 
-    DisconnectReason, 
+    useMultiFileAuthState,
+    DisconnectReason,
     fetchLatestBaileysVersion,
     generateForwardMessageContent,
     prepareWAMessageMedia,
@@ -44,6 +44,9 @@ const { PHONENUMBER_MCC } = require('@whiskeysockets/baileys/lib/Utils/generics'
 const { rmSync, existsSync } = require('fs')
 const { join } = require('path')
 
+// Load your settings (make sure path is correct)
+const settings = require('./settings')
+
 // Create a store object with required methods
 const store = {
     messages: {},
@@ -62,7 +65,7 @@ const store = {
                 }
             })
         })
-        
+
         ev.on('contacts.update', (contacts) => {
             contacts.forEach(contact => {
                 if (contact.id) {
@@ -70,7 +73,7 @@ const store = {
                 }
             })
         })
-        
+
         ev.on('chats.set', (chats) => {
             this.chats = chats
         })
@@ -83,10 +86,9 @@ const store = {
 let phoneNumber = "212684255286   "
 let owner = JSON.parse(fs.readFileSync('./data/owner.json'))
 
-global.botname = "𝑨𝒏𝒅𝒓𝒐𝒎𝒆𝒅𝒂 𝕏Ɽ"
+global.botname = "DEVMD by Mr dev"
 global.themeemoji = "•"
 
-const settings = require('./settings')
 const pairingCode = !!phoneNumber || process.argv.includes("--pairing-code")
 const useMobile = process.argv.includes("--mobile")
 
@@ -97,14 +99,32 @@ const question = (text) => {
         return new Promise((resolve) => rl.question(text, resolve))
     } else {
         // In non-interactive environment, use ownerNumber from settings
-        return Promise.resolve(settings.ownerNumber || phoneNumber)
+        return Promise.resolve(phoneNumber)
     }
 }
 
-         
 async function startXeonBotInc() {
+    // Ensure session folder exists
+    const sessionFolder = './session'
+    if (!fs.existsSync(sessionFolder)) {
+        fs.mkdirSync(sessionFolder, { recursive: true })
+        console.log(chalk.green(`[INFO] Created session folder at ${sessionFolder}`))
+    }
+
+    // === GitHub Auto-Update Check ===
+    if (settings.global.github) {
+        try {
+            const latestCommit = await axios.get(`${settings.global.github}/commits/main`)
+            if (latestCommit.status === 200) {
+                console.log(chalk.cyan(`[Auto-Update] Latest commit fetched from GitHub repo.`))
+            }
+        } catch (e) {
+            console.error(chalk.red('[Auto-Update] Failed to fetch latest commit from GitHub.'), e.message)
+        }
+    }
+
     let { version, isLatest } = await fetchLatestBaileysVersion()
-    const { state, saveCreds } = await useMultiFileAuthState(`./session`)
+    const { state, saveCreds } = await useMultiFileAuthState(sessionFolder)
     const msgRetryCounterCache = new NodeCache()
 
     const XeonBotInc = makeWASocket({
@@ -141,21 +161,20 @@ async function startXeonBotInc() {
             }
             if (!XeonBotInc.public && !mek.key.fromMe && chatUpdate.type === 'notify') return
             if (mek.key.id.startsWith('BAE5') && mek.key.id.length === 16) return
-            
+
             try {
                 await handleMessages(XeonBotInc, chatUpdate, true)
             } catch (err) {
                 console.error("Error in handleMessages:", err)
-                // Only try to send error message if we have a valid chatId
                 if (mek.key && mek.key.remoteJid) {
-                    await XeonBotInc.sendMessage(mek.key.remoteJid, { 
+                    await XeonBotInc.sendMessage(mek.key.remoteJid, {
                         text: '❌ An error occurred while processing your message.',
                         contextInfo: {
                             forwardingScore: 1,
                             isForwarded: true,
                             forwardedNewsletterMessageInfo: {
                                 newsletterJid: '12036316151365998@newsletter',
-                                newsletterName: '𝑨𝒏𝒅𝒓𝒐𝒎𝒆𝒅𝒂 xr͎',
+                                newsletterName: 'DEVMD bot',
                                 serverMessageId: -1
                             }
                         }
@@ -185,7 +204,7 @@ async function startXeonBotInc() {
 
     XeonBotInc.getName = (jid, withoutContact = false) => {
         id = XeonBotInc.decodeJid(jid)
-        withoutContact = XeonBotInc.withoutContact || withoutContact 
+        withoutContact = XeonBotInc.withoutContact || withoutContact
         let v
         if (id.endsWith("@g.us")) return new Promise(async (resolve) => {
             v = store.contacts[id] || {}
@@ -213,7 +232,13 @@ async function startXeonBotInc() {
         if (!!global.phoneNumber) {
             phoneNumber = global.phoneNumber
         } else {
-            phoneNumber = await question(chalk.bgBlack(chalk.greenBright(`Input your phone number to connect 🛰️Andromeda xr 📱\nFormat: 263728036108) (without + or spaces) : `)))
+            console.log(chalk.bgBlueBright.bold(`
+╔══════════════════════════════════════╗
+║          DEVMD Pairing Setup          ║
+╚══════════════════════════════════════╝
+`))
+            console.log(chalk.blueBright(`[Input] Please enter your phone number to start pairing:`))
+            phoneNumber = await question(chalk.bgBlack(chalk.greenBright(`Format: 263728036108) (without + or spaces) : `)))
         }
 
         // Clean the phone number - remove any non-digit characters
@@ -245,40 +270,44 @@ async function startXeonBotInc() {
         if (connection == "open") {
             console.log(chalk.magenta(` `))
             console.log(chalk.yellow(`🌿Connected to => ` + JSON.stringify(XeonBotInc.user, null, 2)))
-            
+
             const botNumber = XeonBotInc.user.id.split(':')[0] + '@s.whatsapp.net';
-            await XeonBotInc.sendMessage(botNumber, { 
+            await XeonBotInc.sendMessage(botNumber, {
                 text: `
-                
-                
-                
-匚ㄖ几Ꮆ尺卂ㄒㄩㄥ卂ㄒ丨ㄖ几丂!
-\n\n 𝑨𝒏𝒅𝒓𝒐𝒎𝒆𝒅𝒂 𝕏Ɽ ʜᴀꜱ ʙᴇᴇɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ
-\n\n⏰ Time: ${new Date().toLocaleString()}\n
- ꜱᴛᴀᴛᴜꜱ: ᴀʟɪᴠᴇ, ʀᴇᴀᴅʏ ꜰᴏʀ ᴛᴀᴋᴇᴏꜰꜰ ✅
-\n𝕱𝖔𝖑𝖑𝖔𝖜 𝖚𝖘 𝖋𝖔𝖗 𝖒𝖔𝖗𝖊 𝖚𝖕𝖉𝖆𝖙𝖊𝖘 
- https://whatsapp.com/channel/0029VbB6Xu9CXC3FaGdkpZ3s
- > © 𝑨𝒏𝒅𝒓𝒐𝒎𝒆𝒅𝒂, ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴢᴇᴅ 2025
-                `,
+───────────────
+   DEVMD by Mr dev
+───────────────
+
+✅ BOT CONNECTED SUCCESSFULLY!
+
+⏰ Time: ${new Date().toLocaleString()}
+
+Status: Alive & Ready 🚀
+
+🌐 Channel:
+https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F
+
+───────────────
+`,
                 contextInfo: {
                     forwardingScore: 1,
                     isForwarded: true,
                     forwardedNewsletterMessageInfo: {
                         newsletterJid: '12036316513685998@newsletter',
-                        newsletterName: '𝑨𝒏𝒅𝒓𝒐𝒎𝒆𝒅𝒂 xr͎',
+                        newsletterName: 'DEVMD bot',
                         serverMessageId: -1
                     }
                 }
-            });
+            })
 
             await delay(1999)
-            console.log(chalk.yellow(`\n\n                  ${chalk.bold.blue(`[ ${global.botname || '𝑨𝒏𝒅𝒓𝒐𝒎𝒆𝒅𝒂 xr͎'} ]`)}\n\n`))
+            console.log(chalk.yellow(`\n\n                  ${chalk.bold.blue(`[ ${global.botname || 'DEVMD bot'} ]`)}\n\n`))
             console.log(chalk.cyan(`< ================================================== >`))
-            console.log(chalk.magenta(`\n${global.themeemoji || '•'} YT CHANNEL: ZED SPACE ͎`))
+            console.log(chalk.magenta(`\n${global.themeemoji || '•'} YT CHANNEL: DANNY TECH ͎`))
             console.log(chalk.magenta(`${global.themeemoji || '•'} GITHUB: Switchedxp `))
             console.log(chalk.magenta(`${global.themeemoji || '•'} WA NUMBER: ${owner}`))
             console.log(chalk.magenta(`${global.themeemoji || '•'} CREDIT: zed`))
-            console.log(chalk.green(`${global.themeemoji || '•'} _ _ _  Andromeda xr has achieved orbital lock. 🛰️
+            console.log(chalk.green(`${global.themeemoji || '•'} _ _ _  DEVMD bot has achieved orbital lock. 🛰️
 connection status: successful✅`))
         }
         if (
@@ -292,7 +321,7 @@ connection status: successful✅`))
     })
 
     XeonBotInc.ev.on('creds.update', saveCreds)
-    
+
     XeonBotInc.ev.on('group-participants.update', async (update) => {
         await handleGroupParticipantUpdate(XeonBotInc, update);
     });
@@ -314,7 +343,6 @@ connection status: successful✅`))
     return XeonBotInc
 }
 
-
 // Start the bot with error handling
 startXeonBotInc().catch(error => {
     console.error('Fatal error:', error)
@@ -323,15 +351,18 @@ startXeonBotInc().catch(error => {
 process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception:', err)
 })
-
 process.on('unhandledRejection', (err) => {
     console.error('Unhandled Rejection:', err)
 })
 
 let file = require.resolve(__filename)
-fs.watchFile(file, () => {
+fs.watchFile(file, { interval: 1000 }, () => {
     fs.unwatchFile(file)
-    console.log(chalk.redBright(`Update ${__filename}`))
+    console.log(chalk.redBright(`\n[Auto-Update] ${__filename} updated, reloading...`))
     delete require.cache[file]
-    require(file)
+    try {
+        require(file)
+    } catch (e) {
+        console.error(chalk.red('[Auto-Update] Error reloading file:'), e)
+    }
 })
