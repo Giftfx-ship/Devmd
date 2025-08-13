@@ -157,6 +157,7 @@ module.exports = {
   handleMessages,
   handleGroupParticipantsUpdate,
   handleStatus,
+  commands // ✅ <-- Add this line to export the loaded commands
 };
 
 if (require.main === module) {
