@@ -16,7 +16,8 @@ require('./githubupdate'); // GitHub auto-update first
 if (!fs.existsSync('./session')) fs.mkdirSync('./session', { recursive: true });
 
 const { Boom } = require('@hapi/boom')
-const fs = require('fs')
+const fs = require('fs');
+console.log(fs); // ✅ Works fine
 const chalk = require('chalk')
 const FileType = require('file-type')
 const path = require('path')
