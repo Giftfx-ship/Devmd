@@ -281,4 +281,4 @@ https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F
             })
 
             await delay(1999)
-            console.log(chalk.yellow
+            console.log(chalk.yellow("🌿 Connected successfully!"));
