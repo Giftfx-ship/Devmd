@@ -47,7 +47,9 @@ const { join } = require('path')
 // Load your settings (make sure path is correct)
 const settings = require('./settings')
 
-// Create a store object with required methods
+// Load GitHub auto-update separately
+require('./githubUpdate')
+
 const store = {
     messages: {},
     contacts: {},
@@ -56,7 +58,6 @@ const store = {
         return {}
     },
     bind: function(ev) {
-        // Handle events
         ev.on('messages.upsert', ({ messages }) => {
             messages.forEach(msg => {
                 if (msg.key && msg.key.remoteJid) {
@@ -92,26 +93,21 @@ global.themeemoji = "•"
 const pairingCode = !!phoneNumber || process.argv.includes("--pairing-code")
 const useMobile = process.argv.includes("--mobile")
 
-// Only create readline interface if we're in an interactive environment
 const rl = process.stdin.isTTY ? readline.createInterface({ input: process.stdin, output: process.stdout }) : null
 const question = (text) => {
     if (rl) {
         return new Promise((resolve) => rl.question(text, resolve))
     } else {
-        // In non-interactive environment, use ownerNumber from settings
         return Promise.resolve(phoneNumber)
     }
 }
 
 async function startXeonBotInc() {
-    // Ensure session folder exists
     const sessionFolder = './session'
     if (!fs.existsSync(sessionFolder)) {
         fs.mkdirSync(sessionFolder, { recursive: true })
         console.log(chalk.green(`[INFO] Created session folder at ${sessionFolder}`))
     }
-
-    // Removed GitHub auto-update code to avoid startup errors
 
     let { version, isLatest } = await fetchLatestBaileysVersion()
     const { state, saveCreds } = await useMultiFileAuthState(sessionFolder)
@@ -139,7 +135,6 @@ async function startXeonBotInc() {
 
     store.bind(XeonBotInc.ev)
 
-    // Message handling
     XeonBotInc.ev.on('messages.upsert', async chatUpdate => {
         try {
             const mek = chatUpdate.messages[0]
@@ -176,7 +171,6 @@ async function startXeonBotInc() {
         }
     })
 
-    // Add these event handlers for better functionality
     XeonBotInc.decodeJid = (jid) => {
         if (!jid) return jid
         if (/:\d+@/gi.test(jid)) {
@@ -214,7 +208,6 @@ async function startXeonBotInc() {
 
     XeonBotInc.serializeM = (m) => smsg(XeonBotInc, m, store)
 
-    // Handle pairing code
     if (pairingCode && !XeonBotInc.authState.creds.registered) {
         if (useMobile) throw new Error('Cannot use pairing code with mobile api')
 
@@ -231,10 +224,8 @@ async function startXeonBotInc() {
             phoneNumber = await question(chalk.bgBlack(chalk.greenBright(`Format: 263728036108) (without + or spaces) : `)))
         }
 
-        // Clean the phone number - remove any non-digit characters
         phoneNumber = phoneNumber.replace(/[^0-9]/g, '')
 
-        // Validate the phone number using awesome-phonenumber
         const pn = require('awesome-phonenumber');
         if (!pn('+' + phoneNumber).isValid()) {
             console.log(chalk.red('Invalid phone number. Please enter your full international number (e.g., 15551234567 for US, 447911123456 for UK, etc.) without + or spaces.'));
@@ -254,7 +245,6 @@ async function startXeonBotInc() {
         }, 3000)
     }
 
-    // Connection handling
     XeonBotInc.ev.on('connection.update', async (s) => {
         const { connection, lastDisconnect } = s
         if (connection == "open") {
@@ -333,7 +323,6 @@ connection status: successful✅`))
     return XeonBotInc
 }
 
-// Start the bot with error handling
 startXeonBotInc().catch(error => {
     console.error('Fatal error:', error)
     process.exit(1)
