@@ -1,69 +1,66 @@
-// commands/help.js
 const fs = require("fs").promises;
 const path = require("path");
-const config = require("../config"); // Make sure this path is correct
+const config = require("../config");
 
 module.exports = {
   name: "help",
   alias: ["menu", "cmd"],
-  description: "Show bot command list",
+  description: "Show all commands grouped by category",
   async execute(sock, msg, args) {
     const chatId = msg.key.remoteJid;
 
-    // Build command menu from config.commands
-    let commandSections = "";
+    // Generate the command list
+    let menuText = `╭────⟪ *${config.botName} Help Menu* ⟫─────⬣
+│ 👑 *Owner:* ${config.ownerName}
+│ 🔗 *Contact:* ${config.ownerContactLink}
+│ ⚙️ *Prefix:* ${config.prefix}
+│ 📢 *Channel:* ${config.channel}
+│ 🧑‍💻 *GitHub:* ${config.github}
+╰───────────────────────────⬣\n`;
+
     for (const [category, cmds] of Object.entries(config.commands)) {
-      const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
-      commandSections += `\n*${categoryName} Commands:*\n` +
-        cmds.map(cmd => `${config.prefix}${cmd}`).join(" | ") + "\n";
+      const title = category.charAt(0).toUpperCase() + category.slice(1);
+      menuText += `\n📁 *${title} Commands:*\n`;
+      cmds.forEach(cmd => {
+        menuText += `  ➤ ${config.prefix}${cmd}\n`;
+      });
     }
 
-    const helpMessage = `
-🪐 「 ${config.botName} 」 🪐
-
-╭───❏ BOT INFO ❏
-│👨‍💻 Developer: ${config.ownerName}
-│⌨️ Prefix: ${config.prefix}
-│📞 Contact: ${config.ownerContactLink}
-│🌐 GitHub: ${config.github}
-│📢 Channel: ${config.channel}
-╰───────────────
-${commandSections}
-
-> ©️ 2025 ${config.botName} | ${config.ownerName}
-`.trim();
+    menuText += `\n📅 ${new Date().toLocaleString()}\n©️ ${config.botName} by ${config.ownerName}`;
 
     try {
       const imagePath = path.join(__dirname, "../assets/bot_image.jpg");
-      let imageExists = false;
+      let imageBuffer;
+
       try {
-        await fs.access(imagePath);
-        imageExists = true;
-      } catch { /* No image found, fallback to text */ }
+        imageBuffer = await fs.readFile(imagePath); // Try to load image
+      } catch {
+        imageBuffer = null; // Fallback if image missing
+      }
 
-      const contextInfo = {
-        forwardingScore: 1,
-        isForwarded: true,
-      };
-
-      if (imageExists) {
-        const imageBuffer = await fs.readFile(imagePath);
+      if (imageBuffer) {
         await sock.sendMessage(chatId, {
           image: imageBuffer,
-          caption: helpMessage,
-          contextInfo
+          caption: menuText,
+          contextInfo: {
+            forwardingScore: 1,
+            isForwarded: true,
+          }
         }, { quoted: msg });
       } else {
         await sock.sendMessage(chatId, {
-          text: helpMessage,
-          contextInfo
+          text: menuText,
+          contextInfo: {
+            forwardingScore: 1,
+            isForwarded: true,
+          }
         }, { quoted: msg });
       }
 
     } catch (err) {
-      console.error("❌ Error in help command:", err);
+      console.error("❌ Failed to send help menu:", err);
       await sock.sendMessage(chatId, {
-        text: helpMessage
+        text: "⚠️ Failed to display help menu."
       }, { quoted: msg });
     }
   }
