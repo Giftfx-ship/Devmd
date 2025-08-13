@@ -1,72 +1,58 @@
-const fs = require('fs').promises;
-const path = require('path');
-const config = require('../config');
+// commands/help.js
+const fs = require("fs").promises;
+const path = require("path");
+const config = require("../config"); // Your config.js file
 
 module.exports = {
-  name: 'menu',
-  alias: ['help', 'cmd'],
-  description: 'Show bot command list',
-  async execute(XeonBotInc, m, args) {
-    const chatId = m.key.remoteJid;
+  name: "menu",
+  alias: ["help", "cmd"],
+  description: "Show bot command list",
+  async execute(sock, msg, args) {
+    const chatId = msg.key.remoteJid;
 
-    let commandSections = '';
+    // Build menu dynamically from config.commands
+    let commandSections = "";
     for (const [category, cmds] of Object.entries(config.commands)) {
       const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
       commandSections += `\n*${categoryName} Commands:*\n` +
-        cmds.map(cmd => `.${cmd}`).join(' | ') + '\n';
+        cmds.map(cmd => `${config.prefix}${cmd}`).join(" | ") + "\n";
     }
 
     const helpMessage = `
 🪐 *「 ${config.botName} 」* 🪐
 
-╭───❏ *STATS* ❏
-│👨‍💻 *Developer:* ${config.ownerName}
-│📚 *Library:* Bailey's
-│⌨️ *Prefix:* ${config.prefix}
-│🖥 *Host:* Linux
-│📞 *Contact:* ${config.ownerContactLink}
-│🌐 *GitHub:* ${config.github.replace(/^https?:\/\//, '')}
-│📢 *Channel:* ${config.channel.replace(/^https?:\/\//, '')}
+╭───❏ *BOT INFO* ❏
+│👨‍💻 Developer: ${config.ownerName}
+│⌨️ Prefix: ${config.prefix}
+│📞 Contact: ${config.ownerContactLink}
+│🌐 GitHub: ${config.github}
+│📢 Channel: ${config.channel}
 ╰───────────────
 ${commandSections}
 
 > © 2025 ${config.botName} | ${config.ownerName}
-`;
+    `.trim();
 
     try {
-      const imagePath = path.join(__dirname, '../assets/bot_image.jpg');
+      // Optional bot image
+      const imagePath = path.join(__dirname, "../assets/bot_image.jpg");
       let imageExists = false;
-      try {
-        await fs.access(imagePath);
-        imageExists = true;
-      } catch {}
+      try { await fs.access(imagePath); imageExists = true; } catch {}
 
       const contextInfo = {
         forwardingScore: 1,
-        isForwarded: true,
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: `${config.channel.replace(/^https?:\/\//, '')}@newsletter`,
-          newsletterName: `${config.botName} 𝕏Ɽ`,
-          serverMessageId: -1,
-        },
+        isForwarded: true
       };
 
       if (imageExists) {
         const imageBuffer = await fs.readFile(imagePath);
-        await XeonBotInc.sendMessage(chatId, {
-          image: imageBuffer,
-          caption: helpMessage,
-          contextInfo,
-        }, { quoted: m });
+        await sock.sendMessage(chatId, { image: imageBuffer, caption: helpMessage, contextInfo }, { quoted: msg });
       } else {
-        await XeonBotInc.sendMessage(chatId, {
-          text: helpMessage,
-          contextInfo,
-        }, { quoted: m });
+        await sock.sendMessage(chatId, { text: helpMessage, contextInfo }, { quoted: msg });
       }
-    } catch (error) {
-      console.error('Error in help command:', error);
-      await XeonBotInc.sendMessage(chatId, { text: helpMessage }, { quoted: m });
+    } catch (err) {
+      console.error("❌ Error in help command:", err);
+      await sock.sendMessage(chatId, { text: helpMessage }, { quoted: msg });
     }
   }
 };
