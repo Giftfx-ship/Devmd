@@ -111,17 +111,7 @@ async function startXeonBotInc() {
         console.log(chalk.green(`[INFO] Created session folder at ${sessionFolder}`))
     }
 
-    // === GitHub Auto-Update Check ===
-    if (settings.global.github) {
-        try {
-            const latestCommit = await axios.get(`${settings.global.github}/commits/main`)
-            if (latestCommit.status === 200) {
-                console.log(chalk.cyan(`[Auto-Update] Latest commit fetched from GitHub repo.`))
-            }
-        } catch (e) {
-            console.error(chalk.red('[Auto-Update] Failed to fetch latest commit from GitHub.'), e.message)
-        }
-    }
+    // Removed GitHub auto-update code to avoid startup errors
 
     let { version, isLatest } = await fetchLatestBaileysVersion()
     const { state, saveCreds } = await useMultiFileAuthState(sessionFolder)
