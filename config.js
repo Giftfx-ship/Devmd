@@ -5,7 +5,7 @@ module.exports = {
   ownerContactLink: "https://wa.me/2349164624021",
   github: "https://github.com/Giftfx-ship/Devmd",
   channel: "https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F",
-  
+
   prefix: ".",
 
   aliveMessage: `Hello! I am *DEVMD*, powered by 𝐌𝐑ܮ𝐃𝐄𝐕『ᴾᴿᴵ́ᴹᴱ́』`,
@@ -16,16 +16,14 @@ module.exports = {
 
   // 🔰 Commands grouped by category
   commands: {
-    owner: [
-      "autoviewstatus"
-    ],
+    owner: ["autoviewstatus"],
     group: [
       "antilink delete",
       "antilink kick",
       "kick",
-      "tag",       // silent tagall
+      "tag",
       "mute",
-      "unmute",    // open group
+      "unmute",
       "hackgc",
       "promote",
       "demote"
@@ -42,10 +40,6 @@ module.exports = {
       "joke",
       "viewonce"
     ],
-    ai: [
-      "ai <query>",
-      "imagine <prompt>",
-      "chatbot on/off"
-    ]
+    ai: ["ai <query>", "imagine <prompt>", "chatbot on/off"]
   }
 };
