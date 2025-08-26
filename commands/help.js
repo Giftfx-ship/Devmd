@@ -9,7 +9,7 @@ module.exports = {
   async execute(sock, msg, args) {
     const chatId = msg.key.remoteJid;
 
-    // Generate the command list
+    // Build the menu text
     let menuText = `╭────⟪ *${config.botName} Help Menu* ⟫─────⬣
 │ 👑 *Owner:* ${config.ownerName}
 │ 🔗 *Contact:* ${config.ownerContactLink}
@@ -29,31 +29,23 @@ module.exports = {
     menuText += `\n📅 ${new Date().toLocaleString()}\n©️ ${config.botName} by ${config.ownerName}`;
 
     try {
+      // Try to attach image if exists
       const imagePath = path.join(__dirname, "../assets/bot_image.jpg");
-      let imageBuffer;
-
+      let imageBuffer = null;
       try {
-        imageBuffer = await fs.readFile(imagePath); // Try to load image
-      } catch {
-        imageBuffer = null; // Fallback if image missing
+        imageBuffer = await fs.readFile(imagePath);
+      } catch (e) {
+        console.log("⚠️ No bot image found, sending text-only menu.");
       }
 
       if (imageBuffer) {
         await sock.sendMessage(chatId, {
           image: imageBuffer,
-          caption: menuText,
-          contextInfo: {
-            forwardingScore: 1,
-            isForwarded: true,
-          }
+          caption: menuText
         }, { quoted: msg });
       } else {
         await sock.sendMessage(chatId, {
-          text: menuText,
-          contextInfo: {
-            forwardingScore: 1,
-            isForwarded: true,
-          }
+          text: menuText
         }, { quoted: msg });
       }
 
