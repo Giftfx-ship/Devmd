@@ -12,6 +12,7 @@
 // ---- GitHub Auto-Update ----
 require('./githubupdate'); // GitHub auto-update first
 
+const crypto = require('crypto');
 const { Boom } = require('@hapi/boom')
 const fs = require('fs'); // ← declare first
 
