@@ -2,7 +2,6 @@
   "name": "DEVMD",
   "version": "1.0",
   "description": "module",
-  "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -67,5 +66,9 @@
     "yt-search": "^2.12.1",
     "ytdl-core": "^4.11.5",
     "simple-git": "^3.17.0"
+  },
+  "engines": {
+    "node": ">=18.0.0 <21.0.0",
+    "npm": ">=8.0.0"
   }
 }
