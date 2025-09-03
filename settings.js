@@ -6,7 +6,7 @@ export const owner = ["2349164624021"];
 export const ownerName = "𝐌𝐑ܮ𝐃𝐄𝐕";
 export const botName = "DEVMD";
 export const github = "https://github.com/Giftfx-ship/Devmd";
-export const channel = "https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F";
+export const channel = "https://whatsapp.com/channel/0029Vb6poDc3QxS2L0dxSq3E";
 export const prefix = "."; // Bot prefix
 export const ownerContactLink = "https://wa.me/2349164624021";
 
