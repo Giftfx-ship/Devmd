@@ -44,7 +44,11 @@ Host your DEVMD bot easily with **bothosting.com** — reliable, professional ho
 
 Stay connected, chat, and collaborate with other users here:
 
-👉 [**Join DEVMD Group Chat**](https://chat.whatsapp.com/BXroZtMlwDJ77FB883RZyl?mode=ac_t)
+## 📢 Official DEVMD Links  
+
+👉 [**Join DEVMD Group Chat**](https://chat.whatsapp.com/BXroZtMlwDJ77FB883RZyl?mode=ac_t)  
+
+🪐 [**Join DEVMD WhatsApp Channel**](https://whatsapp.com/channel/0029Vb6poDc3QxS2L0dxSq3E)
 
 ---
 
