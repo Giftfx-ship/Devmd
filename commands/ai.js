@@ -1,10 +1,10 @@
-const axios = require('axios');
-const fetch = require('node-fetch');
+import axios from 'axios';
+import fetch from 'node-fetch';
 
 const DEV_NAME = 'Mr Dev Prime';
 const CHANNEL_LINK = 'https://whatsapp.com/channel/0029VaJvXM9E5jQzI8kzE03K'; // Your channel link
 
-module.exports = {
+export default {
   name: 'ai',
   alias: ['gpt', 'gemini'],
   description: 'Ask AI (GPT or Gemini) questions',
