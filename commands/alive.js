@@ -1,4 +1,4 @@
-const settings = require("../settings");
+import settings from "../settings.js";
 
 async function aliveCommand(sock, chatId, message) {
   try {
@@ -23,11 +23,11 @@ async function aliveCommand(sock, chatId, message) {
       },
     }, { quoted: message });
   } catch (error) {
-    console.error('Error in alive command:', error);
+    console.error("Error in alive command:", error);
     await sock.sendMessage(chatId, {
       text: `💠 *${settings.botName}* is alive and running!\n📢 Channel: ${settings.channel}`
     }, { quoted: message });
   }
 }
 
-module.exports = aliveCommand;
+export default aliveCommand;
