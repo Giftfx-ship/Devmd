@@ -1,29 +1,26 @@
-const axios = require('axios');
+import axios from "axios";
+import settings from "../settings.js"; // 🔗 central settings.js
 
-const settings = {
-  botName: 'MR DEV',
-  channel: 'https://youtube.com/@mrdev'
-};
-
-const channelInfo = {
-  footer: `Created by ${settings.botName} | Join channel: ${settings.channel}`
-};
-
-module.exports = async function (sock, chatId, message) {
+export default async function factCommand(sock, chatId, message) {
   try {
-    const response = await axios.get('https://uselessfacts.jsph.pl/random.json?language=en');
-    const fact = response.data.text;
+    const response = await axios.get("https://uselessfacts.jsph.pl/random.json?language=en");
+    const fact = response.data?.text || "Couldn't fetch a fact this time.";
 
-    await sock.sendMessage(chatId, { 
-      text: fact,
-      ...channelInfo
-    }, { quoted: message });
-
+    await sock.sendMessage(
+      chatId,
+      {
+        text: `🤔 *Random Fact:*\n\n${fact}\n\nCreated by ${settings.botName}\n📢 Channel: ${settings.channel}`,
+      },
+      { quoted: message }
+    );
   } catch (error) {
-    console.error('Error fetching fact:', error);
-    await sock.sendMessage(chatId, { 
-      text: 'Sorry, there has been some communication interference and I could not get that fact to come through.',
-      ...channelInfo
-    }, { quoted: message });
+    console.error("❌ Error fetching fact:", error.message);
+    await sock.sendMessage(
+      chatId,
+      {
+        text: `⚠️ Sorry, I couldn't fetch a fact due to network issues.\n\nCreated by ${settings.botName}\n📢 Channel: ${settings.channel}`,
+      },
+      { quoted: message }
+    );
   }
-};
+}
