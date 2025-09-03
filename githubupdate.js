@@ -1,5 +1,5 @@
-const axios = require('axios')
-const chalk = require('chalk')
+import axios from 'axios'
+import chalk from 'chalk'
 
 const repourl = 'https://github.com/Giftfx-ship/Devmd' // your GitHub repo URL in lowercase
 
@@ -18,9 +18,9 @@ async function checkgithubupdate() {
 // Initial check immediately
 checkgithubupdate()
 
-// Schedule to run every 16 hours (16 * 60 * 60 * 1000 ms)
+// Schedule to run every 16 hours
 setInterval(() => {
   checkgithubupdate()
 }, 16 * 60 * 60 * 1000)
 
-module.exports = { checkgithubupdate }
+export { checkgithubupdate }
