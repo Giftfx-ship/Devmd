@@ -1,12 +1,49 @@
 {
   "users": [],
+
   "groups": [],
-  "antilink": {},
-  "antibadword": {},
-  "warnings": {},
-  "sudo": [],
-  "welcome": {},
-  "goodbye": {},
-  "chatbot": {},
-  "autoReaction": false
+
+  "antilink": {
+    // "groupId": true
+  },
+
+  "antibadword": {
+    // "groupId": true
+  },
+
+  "warnings": {
+    // "userId": { "count": 0, "reasons": [] }
+  },
+
+  "sudo": [
+    // "ownerId@s.whatsapp.net"
+  ],
+
+  "welcome": {
+    // "groupId": "Welcome message here"
+  },
+
+  "goodbye": {
+    // "groupId": "Goodbye message here"
+  },
+
+  "chatbot": {
+    // "chatId": true/false
+  },
+
+  "autoReaction": false,
+
+  "stickerPacks": {
+    // for .take command
+    // "stickerId": "packname"
+  },
+
+  "mutedGroups": {
+    // "groupId": "unmuteTimestamp"
+  },
+
+  "promotions": {
+    // store history for .promote / .demote
+    // "groupId": [{ "user": "jid", "by": "adminJid", "date": "timestamp" }]
+  }
 }
