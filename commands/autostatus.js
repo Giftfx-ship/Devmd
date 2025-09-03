@@ -1,6 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-const settings = require('../settings');  // Import botName & channel
+import fs from 'fs';
+import path from 'path';
+import settings from '../settings.js';  // Import botName & channel
 
 const channelInfo = {
   contextInfo: {
@@ -15,7 +15,7 @@ const channelInfo = {
 };
 
 // Path to store auto status config
-const configPath = path.join(__dirname, '../data/autoStatus.json');
+const configPath = path.join(process.cwd(), 'data', 'autoStatus.json');
 
 // Initialize config file if missing
 if (!fs.existsSync(configPath)) {
@@ -29,7 +29,7 @@ const DEV_TAG = `*💠 ${settings.botName}*\n👨‍💻 Created by 𝐌𝐑ܮ�
  * Handle .autostatus command
  * Only usable by the bot owner
  */
-async function autoStatusCommand(sock, chatId, msg, args) {
+export async function autoStatusCommand(sock, chatId, msg, args) {
   try {
     if (!msg.key.fromMe) {
       return await sock.sendMessage(chatId, {
@@ -109,7 +109,7 @@ function isAutoStatusEnabled() {
 /**
  * Handle status update events to auto-view statuses
  */
-async function handleStatusUpdate(sock, status) {
+export async function handleStatusUpdate(sock, status) {
   try {
     if (!isAutoStatusEnabled()) return;
 
@@ -159,8 +159,3 @@ async function safeReadMessage(sock, key) {
     }
   }
 }
-
-module.exports = {
-  autoStatusCommand,
-  handleStatusUpdate
-};
