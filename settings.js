@@ -2,26 +2,24 @@
 //  DEVMD BOT SETTINGS
 // ==========================
 
-const fs = require('fs');
-
-global.owner = ["2349164624021"];
-global.ownerName = "𝐌𝐑ܮ𝐃𝐄𝐕";
-global.botName = "DEVMD";
-global.github = "https://github.com/Giftfx-ship/Devmd";
-global.channel = "https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F";
-global.prefix = "."; // Bot prefix
-global.ownerContactLink = "https://wa.me/2349164624021";
+export const owner = ["2349164624021"];
+export const ownerName = "𝐌𝐑ܮ𝐃𝐄𝐕";
+export const botName = "DEVMD";
+export const github = "https://github.com/Giftfx-ship/Devmd";
+export const channel = "https://whatsapp.com/channel/0029VbB3zXu9Gv7LXS62GA1F";
+export const prefix = "."; // Bot prefix
+export const ownerContactLink = "https://wa.me/2349164624021";
 
 // Alive & Welcome messages
-global.aliveMessage = `Hello! I am *${global.botName}*, created by ${global.ownerName}`;
-global.welcomeMessage = `Welcome to the group! I am ${global.botName}, here to assist.`;
-global.goodbyeMessage = `Goodbye! Hope to see you again.`;
+export const aliveMessage = `Hello! I am *${botName}*, created by ${ownerName}`;
+export const welcomeMessage = `Welcome to the group! I am ${botName}, here to assist.`;
+export const goodbyeMessage = `Goodbye! Hope to see you again.`;
 
 // Pairing mode default (no QR, always code)
-global.pairingCode = true;
+export const pairingCode = true;
 
 // Command categories
-global.commands = {
+export const commands = {
   owner: [
     "autoviewstatus"
   ],
@@ -54,12 +52,3 @@ global.commands = {
     "chatbot on/off"
   ]
 };
-
-// Reload on changes
-let file = require.resolve(__filename);
-fs.watchFile(file, () => {
-  fs.unwatchFile(file);
-  console.log(`Updated '${__filename}'`);
-  delete require.cache[file];
-  require(file);
-});
