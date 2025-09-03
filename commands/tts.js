@@ -1,7 +1,7 @@
 // commands/tts.js
-const gTTS = require("gtts");
-const fs = require("fs");
-const path = require("path");
+import gTTS from "gtts";
+import fs from "fs";
+import path from "path";
 
 async function ttsCommand(sock, chatId, text, message, language = "en") {
   if (!text) {
@@ -44,7 +44,7 @@ async function ttsCommand(sock, chatId, text, message, language = "en") {
         {
           audio: audioBuffer,
           mimetype: "audio/mpeg",
-          ptt: false // change to true if you want it as a voice note
+          ptt: false // set true if you want it as a voice note
         },
         { quoted: message }
       );
@@ -64,4 +64,4 @@ async function ttsCommand(sock, chatId, text, message, language = "en") {
   });
 }
 
-module.exports = ttsCommand;
+export default ttsCommand;
