@@ -10,7 +10,6 @@
  * - Pair Code implementation inspired by dev 
  */
 
-// ---- GitHub Auto-Update ----
 import './githubupdate.js'
 
 import crypto from 'crypto'
@@ -25,6 +24,7 @@ import NodeCache from 'node-cache'
 import pino from 'pino'
 import readline from 'readline'
 import { parsePhoneNumber } from 'libphonenumber-js'
+import { fileURLToPath } from 'url'
 
 import {
   default as makeWASocket,
@@ -55,7 +55,15 @@ import { smsg, isUrl, generateMessageTag, getBuffer, getSizeMedia, fetch, sleep,
 // === Import Settings ===
 import settings from './settings.js'
 
-// Ensure session dir exists
+// ============ NODE VERSION GUARD ============
+const [major] = process.versions.node.split('.').map(Number)
+if (major < 18 || major >= 21) {
+  console.error(`❌ Unsupported Node.js version: ${process.versions.node}`)
+  console.error(`👉 Please use Node.js 18, 19, or 20`)
+  process.exit(1)
+}
+
+// ============ SESSION DIR ============
 if (!fs.existsSync('./session')) fs.mkdirSync('./session', { recursive: true })
 
 // Store system
@@ -284,10 +292,10 @@ process.on('unhandledRejection', (err) => {
   console.error('Unhandled Rejection:', err)
 })
 
-let file = require.resolve(__filename)
-fs.watchFile(file, () => {
-    fs.unwatchFile(file)
-    console.log(chalk.redBright(`Update ${__filename}`))
-    delete require.cache[file]
-    require(file)
+// ====== FIXED FILE WATCHER (ESM SAFE) ======
+const __filename = fileURLToPath(import.meta.url)
+fs.watchFile(__filename, () => {
+  fs.unwatchFile(__filename)
+  console.log(chalk.redBright(`Update ${__filename}`))
+  import(`${import.meta.url}?update=${Date.now()}`)
 })
