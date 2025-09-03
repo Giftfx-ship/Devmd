@@ -1,113 +1,105 @@
-const isAdmin = require('../lib/isadmin');
-const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
-const fs = require('fs');
-const path = require('path');
+// commands/tag.js
+import { downloadContentFromMessage } from "@whiskeysockets/baileys";
+import fs from "fs";
+import path from "path";
+import isAdmin from "../lib/isadmin.js";
+import settings from "../settings.js";
 
-async function downloadMediaMessage(message, mediaType) {
-    // Ensure temp directory exists
-    const tempDir = path.join(__dirname, '../temp');
-    if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
-    }
+const channelInfo = {
+  footer: `Created by ${settings.botName} | Join: ${settings.channel}`
+};
 
-    const stream = await downloadContentFromMessage(message, mediaType);
-    let buffer = Buffer.from([]);
-    for await (const chunk of stream) {
-        buffer = Buffer.concat([buffer, chunk]);
-    }
-
-    const filePath = path.join(tempDir, `${Date.now()}.${mediaType}`);
-    fs.writeFileSync(filePath, buffer);
-    return filePath;
+// Helper: download media to buffer (no temp files)
+async function downloadMediaBuffer(message, mediaType) {
+  const stream = await downloadContentFromMessage(message, mediaType);
+  let buffer = Buffer.from([]);
+  for await (const chunk of stream) {
+    buffer = Buffer.concat([buffer, chunk]);
+  }
+  return buffer;
 }
 
 async function tagCommand(sock, chatId, senderId, messageText, replyMessage) {
-    const { isSenderAdmin, isBotAdmin } = await isAdmin(sock, chatId, senderId);
+  const { isSenderAdmin, isBotAdmin } = await isAdmin(sock, chatId, senderId);
 
-    if (!isBotAdmin) {
-        await sock.sendMessage(chatId, { text: 'Please make the bot an admin first.' });
-        return;
+  // Bot must be admin
+  if (!isBotAdmin) {
+    await sock.sendMessage(chatId, { text: "⚠️ Please make the bot an admin first.", ...channelInfo });
+    return;
+  }
+
+  // If user not admin → send fallback sticker (if exists)
+  if (!isSenderAdmin) {
+    const stickerPath = path.join("assets", "sticktag.webp");
+    if (fs.existsSync(stickerPath)) {
+      const stickerBuffer = fs.readFileSync(stickerPath);
+      await sock.sendMessage(chatId, { sticker: stickerBuffer });
+    } else {
+      await sock.sendMessage(chatId, { text: "🚫 Only admins can use the tag command.", ...channelInfo });
+    }
+    return;
+  }
+
+  const groupMetadata = await sock.groupMetadata(chatId);
+  const participants = groupMetadata.participants;
+  const mentionedJidList = participants.map((p) => p.id);
+
+  try {
+    let messageContent = null;
+
+    if (replyMessage) {
+      // Handle different media types
+      if (replyMessage.imageMessage) {
+        const buffer = await downloadMediaBuffer(replyMessage.imageMessage, "image");
+        messageContent = {
+          image: buffer,
+          caption: messageText || replyMessage.imageMessage.caption || "",
+          mentions: mentionedJidList
+        };
+      } else if (replyMessage.videoMessage) {
+        const buffer = await downloadMediaBuffer(replyMessage.videoMessage, "video");
+        messageContent = {
+          video: buffer,
+          caption: messageText || replyMessage.videoMessage.caption || "",
+          mentions: mentionedJidList
+        };
+      } else if (replyMessage.documentMessage) {
+        const buffer = await downloadMediaBuffer(replyMessage.documentMessage, "document");
+        messageContent = {
+          document: buffer,
+          fileName: replyMessage.documentMessage.fileName || "file",
+          caption: messageText || "",
+          mentions: mentionedJidList
+        };
+      } else if (replyMessage.audioMessage) {
+        const buffer = await downloadMediaBuffer(replyMessage.audioMessage, "audio");
+        messageContent = {
+          audio: buffer,
+          mimetype: "audio/mp4",
+          ptt: true,
+          mentions: mentionedJidList
+        };
+      } else if (replyMessage.conversation || replyMessage.extendedTextMessage) {
+        messageContent = {
+          text: replyMessage.conversation || replyMessage.extendedTextMessage.text,
+          mentions: mentionedJidList
+        };
+      }
     }
 
-    if (!isSenderAdmin) {
-        const stickerPath = './assets/sticktag.webp';  // Path to your sticker
-        if (fs.existsSync(stickerPath)) {
-            const stickerBuffer = fs.readFileSync(stickerPath);
-            await sock.sendMessage(chatId, { sticker: stickerBuffer });
-        }
-        return;
+    // If no reply → normal text tag
+    if (!messageContent) {
+      messageContent = {
+        text: messageText || "📢 Attention everyone!",
+        mentions: mentionedJidList
+      };
     }
 
-    const groupMetadata = await sock.groupMetadata(chatId);
-    const participants = groupMetadata.participants;
-    const mentionedJidList = participants.map(p => p.id);
-
-    try {
-        if (replyMessage) {
-            let messageContent = {};
-
-            // Handle image messages
-            if (replyMessage.imageMessage) {
-                const filePath = await downloadMediaMessage(replyMessage, 'image');
-                const imageBuffer = fs.readFileSync(filePath);
-
-                messageContent = {
-                    image: imageBuffer,
-                    caption: messageText || replyMessage.imageMessage.caption || '',
-                    mentions: mentionedJidList
-                };
-
-                // Clean up
-                fs.unlinkSync(filePath);
-            }
-            // Handle video messages
-            else if (replyMessage.videoMessage) {
-                const filePath = await downloadMediaMessage(replyMessage, 'video');
-                const videoBuffer = fs.readFileSync(filePath);
-
-                messageContent = {
-                    video: videoBuffer,
-                    caption: messageText || replyMessage.videoMessage.caption || '',
-                    mentions: mentionedJidList
-                };
-
-                fs.unlinkSync(filePath);
-            }
-            // Handle text messages
-            else if (replyMessage.conversation || replyMessage.extendedTextMessage) {
-                messageContent = {
-                    text: replyMessage.conversation || replyMessage.extendedTextMessage.text,
-                    mentions: mentionedJidList
-                };
-            }
-            // Handle document messages
-            else if (replyMessage.documentMessage) {
-                const filePath = await downloadMediaMessage(replyMessage, 'document');
-                const docBuffer = fs.readFileSync(filePath);
-
-                messageContent = {
-                    document: docBuffer,
-                    fileName: replyMessage.documentMessage.fileName || 'file',
-                    caption: messageText || '',
-                    mentions: mentionedJidList
-                };
-
-                fs.unlinkSync(filePath);
-            }
-
-            if (Object.keys(messageContent).length > 0) {
-                await sock.sendMessage(chatId, messageContent);
-            }
-        } else {
-            await sock.sendMessage(chatId, {
-                text: messageText || "Tagged message",
-                mentions: mentionedJidList
-            });
-        }
-    } catch (error) {
-        console.error('Error in tag command:', error);
-        await sock.sendMessage(chatId, { text: 'An error occurred while tagging the group.' });
-    }
+    await sock.sendMessage(chatId, { ...messageContent, ...channelInfo });
+  } catch (error) {
+    console.error("❌ Error in tag command:", error);
+    await sock.sendMessage(chatId, { text: "⚠️ Failed to tag group.", ...channelInfo });
+  }
 }
 
-module.exports = tagCommand;
+export default tagCommand;
