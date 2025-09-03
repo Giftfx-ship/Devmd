@@ -1,5 +1,5 @@
 // commands/viewonce.js
-const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
+import { downloadContentFromMessage } from "@whiskeysockets/baileys";
 
 async function viewonceCommand(sock, chatId, message) {
   try {
@@ -7,7 +7,11 @@ async function viewonceCommand(sock, chatId, message) {
     const quoted = message.message?.extendedTextMessage?.contextInfo?.quotedMessage;
 
     if (!quoted) {
-      await sock.sendMessage(chatId, { text: '❌ Please reply to a view-once image or video.' }, { quoted: message });
+      await sock.sendMessage(
+        chatId,
+        { text: "❌ Please reply to a view-once image or video." },
+        { quoted: message }
+      );
       return;
     }
 
@@ -20,33 +24,41 @@ async function viewonceCommand(sock, chatId, message) {
 
     if (quotedImage) {
       // Download the image
-      const stream = await downloadContentFromMessage(quotedImage, 'image');
+      const stream = await downloadContentFromMessage(quotedImage, "image");
       let buffer = Buffer.from([]);
       for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
 
       await sock.sendMessage(
         chatId,
-        { image: buffer, caption: quotedImage.caption || '', fileName: 'media.jpg' },
+        { image: buffer, caption: quotedImage.caption || "", fileName: "media.jpg" },
         { quoted: message }
       );
     } else if (quotedVideo) {
       // Download the video
-      const stream = await downloadContentFromMessage(quotedVideo, 'video');
+      const stream = await downloadContentFromMessage(quotedVideo, "video");
       let buffer = Buffer.from([]);
       for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
 
       await sock.sendMessage(
         chatId,
-        { video: buffer, caption: quotedVideo.caption || '', fileName: 'media.mp4' },
+        { video: buffer, caption: quotedVideo.caption || "", fileName: "media.mp4" },
         { quoted: message }
       );
     } else {
-      await sock.sendMessage(chatId, { text: '❌ That is not a view-once media.' }, { quoted: message });
+      await sock.sendMessage(
+        chatId,
+        { text: "❌ That is not a view-once media." },
+        { quoted: message }
+      );
     }
   } catch (err) {
-    console.error('Error in viewonceCommand:', err);
-    await sock.sendMessage(chatId, { text: '⚠️ Failed to retrieve view-once media.' }, { quoted: message });
+    console.error("Error in viewonceCommand:", err);
+    await sock.sendMessage(
+      chatId,
+      { text: "⚠️ Failed to retrieve view-once media." },
+      { quoted: message }
+    );
   }
 }
 
-module.exports = viewonceCommand;
+export default viewonceCommand;
