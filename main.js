@@ -1,15 +1,20 @@
 import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
-import makeWASocket, { useMultiFileAuthState } from "@whiskeysockets/baileys"
+import makeWASocket, {
+  useMultiFileAuthState,
+  fetchLatestBaileysVersion,
+} from "@whiskeysockets/baileys"
 import P from "pino"
+import readline from "readline"
+import PhoneNumber from "awesome-phonenumber"
 import settings from "./settings.js"
 
-// ES Module dirname fix
+// ===== ES Module dirname fix =====
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-// ===== Load Commands =====
+// ===== Commands Loader =====
 const commands = new Map()
 const commandsPath = path.join(__dirname, "commands")
 
@@ -38,16 +43,12 @@ if (fs.existsSync(commandsPath)) {
           }
 
           if (executeFn) {
-            // Main command
             commands.set(name.toLowerCase(), { execute: executeFn, raw: cmdModule })
-
-            // Alias support
             if (cmdModule.alias && Array.isArray(cmdModule.alias)) {
               cmdModule.alias.forEach((alias) => {
                 commands.set(alias.toLowerCase(), { execute: executeFn, raw: cmdModule })
               })
             }
-
             console.log(`✅ Loaded command: ${name}`)
           } else {
             console.warn(`⚠️ No executable function found in ${file}`)
@@ -71,7 +72,6 @@ async function handleMessage(sock, msg) {
     msg.message?.imageMessage?.caption ||
     ""
 
-  // Use prefix from settings.js
   if (messageText.startsWith(settings.prefix)) {
     const args = messageText.slice(settings.prefix.length).trim().split(/ +/)
     const cmdName = args.shift().toLowerCase()
@@ -81,13 +81,14 @@ async function handleMessage(sock, msg) {
         await commands.get(cmdName).execute(sock, msg, args)
       } catch (err) {
         console.error(`❌ Error executing command ${cmdName}:`, err)
-        await sock.sendMessage(senderId, { text: `⚠️ Error running this command: ${err.message}` })
+        await sock.sendMessage(senderId, {
+          text: `⚠️ Error running this command: ${err.message}`,
+        })
       }
     }
   }
 }
 
-// ===== Compatibility Wrappers =====
 async function handleMessages(sock, m) {
   if (!m) return
 
@@ -122,11 +123,44 @@ async function handleStatus(sock, status) {
   console.log("📢 Status update:", status)
 }
 
+// ====== SESSION HELPERS ======
+const rl = process.stdin.isTTY
+  ? readline.createInterface({ input: process.stdin, output: process.stdout })
+  : null
+const ask = (q) =>
+  new Promise((resolve) => {
+    if (rl) rl.question(q, (a) => resolve(a))
+    else resolve("")
+  })
+
+const encodeSession = (state) =>
+  Buffer.from(JSON.stringify(state)).toString("base64")
+const decodeSession = (b64) =>
+  JSON.parse(Buffer.from(b64, "base64").toString("utf-8"))
+
 // ===== Bot Startup =====
 async function startBot() {
+  const inputSession = (await ask("Enter your SESSION_ID (press Enter to pair new): ")).trim()
+
+  // Try load session
+  if (inputSession) {
+    try {
+      const parsed = decodeSession(inputSession)
+      if (!fs.existsSync("./session")) fs.mkdirSync("./session", { recursive: true })
+      fs.writeFileSync("./session/session.json", JSON.stringify(parsed, null, 2))
+      if (parsed.creds) fs.writeFileSync("./session/creds.json", JSON.stringify(parsed.creds, null, 2))
+      if (parsed.keys) fs.writeFileSync("./session/keys.json", JSON.stringify(parsed.keys, null, 2))
+      console.log("✅ Loaded SESSION_ID into ./session")
+    } catch (e) {
+      console.warn("⚠️ Invalid SESSION_ID, fallback to pairing flow.")
+    }
+  }
+
   const { state, saveCreds } = await useMultiFileAuthState("session")
+  let { version } = await fetchLatestBaileysVersion()
 
   const sock = makeWASocket({
+    version,
     logger: P({ level: "silent" }),
     printQRInTerminal: false,
     auth: state,
@@ -134,16 +168,31 @@ async function startBot() {
 
   sock.ev.on("creds.update", saveCreds)
 
-  sock.ev.on("connection.update", (update) => {
+  sock.ev.on("connection.update", async (update) => {
     if (update.connection === "open") {
       console.log(`✅ ${settings.botName} Connected!`)
       console.log(`📢 Channel: ${settings.channelLink}`)
+
+      // export SESSION_ID
+      const exportState = { creds: state.creds, keys: state.keys }
+      const exported = encodeSession(exportState)
+
+      fs.writeFileSync("./session/session.base64", exported)
+      fs.writeFileSync("./session.txt", exported)
+      console.log("\n🔐 SESSION_ID (base64):\n" + exported + "\n")
+
+      // send to your own chat
+      const selfJid = sock.user.id.split(":")[0] + "@s.whatsapp.net"
+      await sock.sendMessage(selfJid, {
+        text: `✅ Bot paired successfully!\n\n📌 SESSION_ID:\n${exported}`,
+      })
     } else if (update.connection === "close") {
       const statusCode = update.lastDisconnect?.error?.output?.statusCode
       if (statusCode === 401 || statusCode === 428) {
         console.log("❌ Logged out or session invalid. Delete session folder and re-run.")
       } else {
         console.log("🔄 Reconnecting...")
+        startBot()
       }
     }
   })
@@ -156,7 +205,7 @@ async function startBot() {
     await handleGroupParticipantsUpdate(sock, update)
   })
 
-  console.log(`✅ ${settings.botName} started successfully!`)
+  console.log(`🚀 ${settings.botName} started successfully!`)
 }
 
 export {
@@ -165,10 +214,9 @@ export {
   handleMessages,
   handleGroupParticipantsUpdate,
   handleStatus,
-  commands, // ✅ export loaded commands
+  commands,
 }
 
-// Auto-start if run directly
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   startBot()
 }
