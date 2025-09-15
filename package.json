@@ -1,19 +1,24 @@
 {
-  "name": "DEVMD",
-  "version": "1.0",
-  "description": "module",
+  "name": "devmd",
+  "version": "1.0.0",
+  "description": "A WhatsApp bot powered by Baileys",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "docker:build": "docker build -t knightbot .",
-    "docker:run": "docker run -e SESSION_ID=$SESSION_ID knightbot"
+    "dev": "nodemon index.js",
+    "docker:build": "docker build -t devmd .",
+    "docker:run": "docker run -e SESSION_ID=$SESSION_ID devmd"
   },
   "keywords": [
-    "whatsapp-bot"
+    "whatsapp",
+    "whatsapp-bot",
+    "baileys",
+    "session-id",
+    "devmd"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "Mr Dev",
+  "license": "MIT",
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
     "@ffmpeg/ffmpeg": "^0.12.15",
@@ -66,6 +71,9 @@
     "yt-search": "^2.12.1",
     "ytdl-core": "^4.11.5",
     "simple-git": "^3.17.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   },
   "engines": {
     "node": ">=18.0.0 <21.0.0",
