@@ -54,3 +54,19 @@ export const commands = {
     "chatbot on/off"
   ]
 };
+
+// === DEFAULT EXPORT FOR IMPORT SUPPORT ===
+export default {
+  owner,
+  ownerName,
+  botName,
+  github,
+  channelLink,
+  ownerContactLink,
+  prefix,
+  pairingCode,
+  aliveMessage,
+  welcomeMessage,
+  goodbyeMessage,
+  commands
+};
