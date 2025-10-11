@@ -23,7 +23,7 @@ import PhoneNumber from 'awesome-phonenumber'
 import NodeCache from 'node-cache'
 import pino from 'pino'
 import readline from 'readline'
-import { parsePhoneNumber } from 'lib/mini-libphonenumber.js'
+import { parsePhoneNumber } from './lib/mini-libphonenumber.js'
 import { fileURLToPath } from 'url'
 
 import {
