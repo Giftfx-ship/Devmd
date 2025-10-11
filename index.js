@@ -135,18 +135,28 @@ async function startXeonBotInc() {
       }
     }
 
+    // Use multi-file auth state (recommended)
     const { state, saveCreds } = await useMultiFileAuthState('./session')
     const msgRetryCounterCache = new NodeCache()
+
+    // fetch latest baileys version
     const { version } = await fetchLatestBaileysVersion()
+
+    // Provide a logger that implements standard methods (trace, debug, info, warn, error)
+    const logger = pino({ level: 'silent' })
+
+    // make the keys store cacheable; pass the logger (important to have the methods)
+    const cachedKeys = makeCacheableSignalKeyStore(state.keys, logger)
 
     const XeonBotInc = makeWASocket({
       version,
-      logger: pino({ level: 'silent' }),
+      logger,
       printQRInTerminal: false,
       browser: ['Ubuntu', 'Chrome', '20.0.04'],
+      // pass the auth object (creds + keys)
       auth: {
         creds: state.creds,
-        keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'fatal' }).child({ level: 'fatal' })),
+        keys: cachedKeys,
       },
       markOnlineOnConnect: true,
       generateHighQualityLinkPreview: true,
@@ -159,8 +169,12 @@ async function startXeonBotInc() {
       defaultQueryTimeoutMs: undefined,
     })
 
+    // Persist credentials when they update
+    XeonBotInc.ev.on('creds.update', saveCreds)
+
     store.bind(XeonBotInc.ev)
 
+    // Pairing flow if not registered
     if (!XeonBotInc.authState?.creds?.registered) {
       const rawNumber = (await ask('📱 No active session. Enter your phone number (country code then number, e.g. 2348012345678): ')) || ''
       const phoneNumber = rawNumber.replace(/[^0-9]/g, '')
@@ -172,6 +186,7 @@ async function startXeonBotInc() {
       }
       try {
         await new Promise((r) => setTimeout(r, 1200))
+        // requestPairingCode is part of the pairing API in modern Baileys builds
         const rawCode = await XeonBotInc.requestPairingCode(phoneNumber)
         const code = rawCode?.match(/.{1,4}/g)?.join('-') || rawCode
         console.log(chalk.green(`\n✅ Your Pairing Code: ${code}`))
@@ -183,6 +198,7 @@ async function startXeonBotInc() {
       }
     }
 
+    // Message upsert handler
     XeonBotInc.ev.on('messages.upsert', async (chatUpdate) => {
       try {
         const mek = chatUpdate.messages[0]
@@ -193,13 +209,14 @@ async function startXeonBotInc() {
           return
         }
         if (!XeonBotInc.public && !mek.key.fromMe && chatUpdate.type === 'notify') return
-        if (mek.key.id.startsWith('BAE5') && mek.key.id.length === 16) return
+        if (mek.key.id && mek.key.id.startsWith('BAE5') && mek.key.id.length === 16) return
         await handleMessages(XeonBotInc, chatUpdate, true)
       } catch (err) {
         console.error('Error in messages.upsert:', err)
       }
     })
 
+    // decode jid helper
     XeonBotInc.decodeJid = (jid) => {
       if (!jid) return jid
       if (/:\d+@/gi.test(jid)) {
@@ -208,6 +225,7 @@ async function startXeonBotInc() {
       } else return jid
     }
 
+    // contacts.update handler
     XeonBotInc.ev.on('contacts.update', (update) => {
       for (let contact of update) {
         const id = XeonBotInc.decodeJid(contact.id)
@@ -215,6 +233,7 @@ async function startXeonBotInc() {
       }
     })
 
+    // getName helper preserved
     XeonBotInc.getName = async (jid, withoutContact = false) => {
       const id = XeonBotInc.decodeJid(jid)
       withoutContact = XeonBotInc.withoutContact || withoutContact
@@ -232,12 +251,13 @@ async function startXeonBotInc() {
     XeonBotInc.public = false
     XeonBotInc.serializeM = (m) => smsg(XeonBotInc, m, store)
 
+    // connection update
     XeonBotInc.ev.on('connection.update', async (update) => {
       const { connection, lastDisconnect } = update
       if (connection === 'open') {
         console.log(chalk.yellow(`\n🌿 Connected as ${JSON.stringify(XeonBotInc.user, null, 2)}`))
 
-        // --- Startup message preserved ---
+        // startup message
         try {
           const botNumber = XeonBotInc.user.id.split(':')[0] + '@s.whatsapp.net'
           await XeonBotInc.sendMessage(botNumber, {
@@ -262,7 +282,7 @@ async function startXeonBotInc() {
       }
     })
 
-    XeonBotInc.ev.on('creds.update', saveCreds)
+    // other events
     XeonBotInc.ev.on('group-participants.update', async (update) => await handleGroupParticipantUpdate(XeonBotInc, update))
     XeonBotInc.ev.on('status.update', async (status) => await handleStatus(XeonBotInc, status))
     XeonBotInc.ev.on('messages.reaction', async (status) => await handleStatus(XeonBotInc, status))
