@@ -174,8 +174,8 @@ async function startXeonBotInc() {
 
     store.bind(XeonBotInc.ev)
 
-    // Pairing flow if not registered
-    if (!XeonBotInc.authState?.creds?.registered) {
+    // Pairing flow: check the state returned by useMultiFileAuthState (more reliable)
+    if (!state.creds?.registered) {
       const rawNumber = (await ask('📱 No active session. Enter your phone number (country code then number, e.g. 2348012345678): ')) || ''
       const phoneNumber = rawNumber.replace(/[^0-9]/g, '')
       const pn = new PhoneNumber('+' + phoneNumber)
@@ -233,18 +233,35 @@ async function startXeonBotInc() {
       }
     })
 
-    // getName helper preserved
+    // getName helper preserved and fixed (use 'new PhoneNumber' and correct variable)
     XeonBotInc.getName = async (jid, withoutContact = false) => {
       const id = XeonBotInc.decodeJid(jid)
       withoutContact = XeonBotInc.withoutContact || withoutContact
       let v
-      if (id.endsWith('@g.us')) {
-        v = store.contacts[id] || {}
-        if (!(v.name || v.subject)) v = await XeonBotInc.groupMetadata(id) || {}
-        return v.name || v.subject || PhoneNumber('+' + id.replace('@s.whatsapp.net', '')).getNumber('international')
-      } else {
-        v = id === '0@s.whatsapp.net' ? { id, name: 'WhatsApp' } : id === XeonBotInc.decodeJid(XeonBotInc.user?.id) ? XeonBotInc.user : store.contacts[id] || {}
-        return (withoutContact ? '' : v.name) || v.subject || v.verifiedName || PhoneNumber('+' + jid.replace('@s.whatsapp.net', '')).getNumber('international')
+      try {
+        if (id && id.endsWith('@g.us')) {
+          v = store.contacts[id] || {}
+          if (!(v.name || v.subject)) v = await XeonBotInc.groupMetadata(id) || {}
+          // if no name/subject, attempt to format a phone-like fallback (group JIDs won't format)
+          if (v.name || v.subject) return v.name || v.subject || ''
+          return ''
+        } else {
+          v = id === '0@s.whatsapp.net' ? { id, name: 'WhatsApp' } : id === XeonBotInc.decodeJid(XeonBotInc.user?.id) ? XeonBotInc.user : store.contacts[id] || {}
+          // For individual contacts, try contact name, subject, verifiedName, then phone format
+          if ((withoutContact ? '' : v.name) || v.subject || v.verifiedName) {
+            return (withoutContact ? '' : v.name) || v.subject || v.verifiedName
+          }
+          // fallback: extract number part and format internationally
+          const numeric = (id && id.replace('@s.whatsapp.net', '')) || ''
+          if (numeric) {
+            const pn = new PhoneNumber('+' + numeric)
+            if (pn.isValid && pn.isValid()) return pn.getNumber('international')
+          }
+          return ''
+        }
+      } catch (e) {
+        // safe fallback
+        return ''
       }
     }
 
@@ -259,9 +276,12 @@ async function startXeonBotInc() {
 
         // startup message
         try {
-          const botNumber = XeonBotInc.user.id.split(':')[0] + '@s.whatsapp.net'
-          await XeonBotInc.sendMessage(botNumber, {
-            text: `
+          // guard against missing user object
+          const rawId = XeonBotInc.user?.id || ''
+          const botNumber = rawId ? rawId.split(':')[0] + '@s.whatsapp.net' : null
+          if (botNumber) {
+            await XeonBotInc.sendMessage(botNumber, {
+              text: `
 匚ㄖ几Ꮆ尺卂ㄒㄩㄥ卂ㄒ丨ㄖ几丂! 🚀
 💠 *${settings.botName} Connected Successfully!*
 ⏰ *Time:* ${new Date().toLocaleString()}
@@ -269,8 +289,9 @@ async function startXeonBotInc() {
 📢 *Stay Updated:* ${settings.channelLink || ''}
 💬 *Official Group:* ${settings.groupLink || ''}
 © 2025 *${settings.botName}* — made by ${settings.ownerName || 'owner'}
-            `
-          })
+              `
+            })
+          }
           console.log(chalk.green(`✅ ${settings.botName} is running!`))
         } catch (e) { console.error('Startup message error:', e) }
 
